@@ -3,7 +3,7 @@ import sys
 import torch
 
 current_dir = os.getcwd()
-src_dir = os.path.join(current_dir, '..', 'src')
+src_dir = os.path.join(current_dir, "..", "src")
 sys.path.append(src_dir)
 import unittest
 from src.state import State

@@ -21,7 +21,7 @@ initial_board = torch.tensor(
 class State:
     def __init__(
         self,
-        score=torch.tensor([0, 0, 0]), #p1 win, draw, p2 win
+        score=torch.tensor([0, 0, 0]),  # p1 win, draw, p2 win
         turn=0,
         player_colors=[1, -1],
         game_count=0,
