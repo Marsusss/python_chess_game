@@ -13,14 +13,14 @@ class rules:
 
     def get_allowed_moves(self, state, player):
         pieces, positions = state.get_player_pieces(player)
-        move_list = []
+        # move_list = []
         for i, piece in enumerate(pieces):
             self.get_allowed_move(self, state, piece, player, positions[i])
             # move_pattern = get_move_pattern(piece)
             # conv(self.board, move_pattern)
 
     def get_allowed_move(self, state, piece, player, position):
-        coordinate = self.coordinate_to_point(position)
+        # coordinate = self.coordinate_to_point(position)
         if abs(piece) == 1:
             self.get_allowed_king_moves(self, state, player, position)
         if abs(piece) == 2:
