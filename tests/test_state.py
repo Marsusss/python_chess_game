@@ -1,11 +1,12 @@
 import os
 import sys
+import unittest
+
 import torch
 
 current_dir = os.getcwd()
 src_dir = os.path.join(current_dir, "..", "src")
 sys.path.append(src_dir)
-import unittest
 from src.state import State
 
 
@@ -21,7 +22,7 @@ class TestState(unittest.TestCase):
         state.update_positions((2, 2), (4, 3))
 
         # Check that the board was updated correctly
-        correct_board = initial_board = torch.tensor(
+        correct_board = torch.tensor(
             [
                 [-3, 0, -4, -2, -1, -4, -5, -3],  # black
                 [-6, -6, -6, -6, -6, -6, -6, -6],
