@@ -2,23 +2,24 @@
 # white pieces: king = 1, queen = 2, castle = 3, bishop = 4, knight = 5, pawn = 6
 # player is 0 or 1
 # player color 1 is white, -1 is black
-import torch
 import numpy
+import torch
 
 initial_board = torch.tensor([
-[0,  0,  0,  0, -1,  0,  0,  0], #black
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  0,  0,  0,  0],
-[0,  0,  0,  0,  1,  0,  0,  0]  #white
+    [0,  0,  0,  0, -1,  0,  0,  0],  # black
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [0,  0,  0,  0,  1,  0,  0,  0]  # white
 ])
 
+
 class state:
-    def __init__(self, score = torch.tensor([0, 0, 0]), turn = 0, player_colors = [1, -1], game_count = 0,
-    board = initial_board):
+    def __init__(self, score=torch.tensor([0, 0, 0]), turn=0, player_colors=[1, -1], game_count=0,
+                 board=initial_board):
         self.board = board
         self.score = score
         self.turn_number = turn
