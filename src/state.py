@@ -6,22 +6,22 @@ import torch
 
 initial_board = torch.tensor(
     [
-        [0, 0, 0, 0, -1, 0, 0, 0],  # black
+        [-3, -5, -4, -2, -1, -4, -5, -3],  # black
+        [-6, -6, -6, -6, -6, -6, -6, -6],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0],  # white
+        [6, 6, 6, 6, 6, 6, 6, 6],
+        [3, 5, 4, 2, 1, 4, 5, 3],  # white
     ]
 )
 
 
-class state:
+class State:
     def __init__(
         self,
-        score=torch.tensor([0, 0, 0]),
+        score=torch.tensor([0, 0, 0]), #p1 win, draw, p2 win
         turn=0,
         player_colors=[1, -1],
         game_count=0,
