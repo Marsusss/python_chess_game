@@ -22,15 +22,16 @@ class State:
     def __init__(
         self,
         score=torch.tensor([0, 0, 0]),  # p1 win, draw, p2 win
-        turn=0,
+        turn_number=0,
+        player_turn=1,
         player_colors=[1, -1],
         game_count=0,
         board=initial_board,
     ):
         self.board = board
         self.score = score
-        self.turn_number = turn
-        self.play_turn = 1
+        self.turn_number = turn_number
+        self.player_turn = player_turn
         self.player_colors = player_colors
         self.game_count = game_count
 
@@ -41,7 +42,7 @@ class State:
     def update_score(self, result):
         self.score += result
 
-    def update_turn_number(self):
+    def next_turn(self):
         self.turn_number += 1
         self.player_turn *= -1
 
@@ -70,5 +71,5 @@ class State:
         return self.board * player_color > 0
 
     def get_player_pieces_and_coordinates(self, player):
-        positions = self.get_player_positions(self, player)
+        positions = self.get_player_positions(player)
         return self.board[positions], torch.nonzero(positions)

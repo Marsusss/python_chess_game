@@ -1,9 +1,9 @@
-name: Lint
+name: tests
 
 on: [pull_request]
 
 jobs:
-  lint:
+  tests:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
@@ -16,13 +16,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install isort
+        python -m pip install --upgrade pip
+        pip install pytest
+        pip install torch
 
-    - name: flake8 Lint
-      uses: py-actions/flake8@v2
-      with:
-        max-line-length: "88"
-        ignore: "E402"
-
-    - name: Check import order with isort
-      run: isort . --check-only
+    - name: Run tests
+      run: python3 -m pytest
+      env:
+        PYTHONPATH: ${{ github.workspace }}/src
