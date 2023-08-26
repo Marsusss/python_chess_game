@@ -1,12 +1,12 @@
 import torch
 
 
-class rules:
+class Rules:
     def __init__(self):
         print("doing nothing")
 
-    def is_move_valid(self, state, move):
-        if move in self.get_allowed_moves(state):
+    def is_move_valid(self, state, player, move):
+        if move in self.get_allowed_moves(state, player):
             return True
         else:
             return False
@@ -15,28 +15,29 @@ class rules:
         pieces, positions = state.get_player_pieces(player)
         # move_list = []
         for i, piece in enumerate(pieces):
-            self.get_allowed_move(self, state, piece, player, positions[i])
+            self.get_allowed_move(state, piece, player, positions[i])
             # move_pattern = get_move_pattern(piece)
             # conv(self.board, move_pattern)
 
     def get_allowed_move(self, state, piece, player, position):
         # coordinate = self.coordinate_to_point(position)
         if abs(piece) == 1:
-            self.get_allowed_king_moves(self, state, player, position)
+            self.get_allowed_king_moves(state, player, position)
         if abs(piece) == 2:
-            self.get_allowed_queen_moves(self, state, player, position)
+            self.get_allowed_queen_moves(state, player, position)
         if abs(piece) == 3:
-            self.get_allowed_rook_moves()
+            self.get_allowed_rook_moves(state, player, position)
         if abs(piece) == 4:
-            self.get_allowed_bishop_moves()
+            self.get_allowed_bishop_moves(state, player, position)
         if abs(piece) == 5:
-            self.get_allowed_knight_moves()
+            self.get_allowed_knight_moves(state, player, position)
         if abs(piece) == 6:
-            self.get_allowed_pawn_moves(player)
+            self.get_allowed_pawn_moves(state, player, position)
 
-    def coordinate_to_point(position):
+    def coordinates_to_points(self, positions):
         board_position = torch.zeros((8, 8))
-        board_position[position] = 1
+        for position in positions:
+            board_position[position[0], position[1]] = 1
         return board_position
 
     def check_if_is_check(self, state, allowed_moves_coordinates, player, piece):
@@ -46,7 +47,7 @@ class rules:
             suggested_board[coordinate] = piece
             prev_position = [0, 0]  # This is a mock do it real
             suggested_board[prev_position] = 0  # is empty
-            check = self.is_check(self, suggested_board)
+            check = self.is_check(suggested_board)
             if check:
                 allowed_moves[coordinate] = 0
         return allowed_moves
@@ -62,7 +63,7 @@ class rules:
         # mock
         return False
 
-    def is_blocked(is_own, is_opponents):
+    def is_blocked(self, is_own, is_opponents):
         if is_own:
             return False, 0  # Is blocked, can not use field
         elif is_opponents:
@@ -79,7 +80,7 @@ class rules:
         allowed_moves *= available_spaces
         allowed_moves_coordinates = torch.nonzero(allowed_moves)
         allowed_moves = self.check_if_is_check(
-            self, state, allowed_moves_coordinates, player, 1
+            state, allowed_moves_coordinates, player, 1
         )
 
         return allowed_moves
@@ -87,8 +88,8 @@ class rules:
     def get_allowed_queen_moves(
         self, state, player, position, is_rook=False, is_bishop=False
     ):
-        own_positions = torch.nonzero(state.get_player_positions(self, player))
-        opponent_positions = torch.nonzero(state.get_player_positions(self, player))
+        own_positions = torch.nonzero(state.get_player_positions(player))
+        opponent_positions = torch.nonzero(state.get_player_positions(player))
         dist_xy = position, 7 - position
         allowed_moves = torch.zeros((8, 8))
         toggle_xp = True
@@ -192,21 +193,19 @@ class rules:
 
         allowed_moves_coordinates = torch.nonzero(allowed_moves)
         allowed_moves = self.check_if_is_check(
-            self, state, allowed_moves_coordinates, player, 2
+            state, allowed_moves_coordinates, player, 2
         )
 
         return allowed_moves
 
     def get_allowed_rook_moves(self, state, player, position):
-        return self.get_allowed_queen_moves(self, state, player, position, is_rook=True)
+        return self.get_allowed_queen_moves(state, player, position, is_rook=True)
 
     def get_allowed_bishop_moves(self, state, player, position):
-        return self.get_allowed_queen_moves(
-            self, state, player, position, is_bishop=True
-        )
+        return self.get_allowed_queen_moves(state, player, position, is_bishop=True)
 
     def get_allowed_knight_moves(self, state, player, position):
-        own_board = state.get_player_positions(self, player)
+        own_board = state.get_player_positions(player)
         base = torch.tensor(
             [
                 [0, 1, 0, 1, 0],
@@ -224,7 +223,7 @@ class rules:
 
         allowed_moves_coordinates = torch.nonzero(allowed_moves)
         allowed_moves = self.check_if_is_check(
-            self, state, allowed_moves_coordinates, player, 4
+            state, allowed_moves_coordinates, player, 4
         )
 
     def get_allowed_pawn_moves(self, state, player, position):
