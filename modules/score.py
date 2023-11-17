@@ -15,6 +15,12 @@ class Score:
         Returns the score for the given key.
     __setitem__(key, value)
         Sets the score for the given key to the given value.
+    keys()
+        Returns the keys of the score dictionary.
+    values()
+        Returns the values of the score dictionary.
+    update_score(winner)
+        Increments the score of the given winner by 1.
     """
 
     def __init__(self, score=None):
@@ -58,3 +64,16 @@ class Score:
         if value < 0:
             raise ValueError(f'Error: score["{key}"] is {value}, should be at least 0')
         self._score[key] = value
+
+    def keys(self):
+        return self._score.keys()
+
+    def values(self):
+        return self._score.values()
+
+    def update_score(self, winner):
+        if winner not in self._score:
+            raise KeyError(
+                f'Invalid key: "{winner}". Only {self._score.keys()} are allowed.'
+            )
+        self._score[winner] += 1

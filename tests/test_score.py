@@ -16,6 +16,18 @@ class TestScore(unittest.TestCase):
         self.score["p1"] = 5
         self.assertEqual(self.score["p1"], 5)
 
+    def test_keys(self):
+        keys = self.score.keys()
+        self.assertEqual(set(keys), {"p1", "draw", "p2"})
+
+    def test_values(self):
+        values = self.score.values()
+        self.assertEqual(set(values), {0})
+
+    def test_update_score(self):
+        self.score.update_score("p1")
+        self.assertEqual(self.score["p1"], 1)
+
     def test_invalid_key(self):
         with self.assertRaises(KeyError):
             self.score["p3"] = 5
@@ -54,6 +66,10 @@ class TestScore(unittest.TestCase):
     def test_negative_initial_value(self):
         with self.assertRaises(ValueError):
             Score({"p1": -1, "draw": 0, "p2": 0})
+
+    def test_update_score_invalid_key(self):
+        with self.assertRaises(KeyError):
+            self.score.update_score("p3")
 
 
 if __name__ == "__main__":
