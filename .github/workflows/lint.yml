@@ -1,22 +1,22 @@
 name: Lint
 
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - '**.py'
+      - '.github/workflows/lint.yml'
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.11
-
-    - name: Install dependencies
-      run: |
-        pip install isort
 
     - name: flake8 Lint
       uses: py-actions/flake8@v2
@@ -24,5 +24,5 @@ jobs:
         max-line-length: "88"
         ignore: "E402"
 
-    - name: Check import order with isort
-      run: isort . --check-only
+    - name: isort lint
+      uses: isort/isort-action@v1
