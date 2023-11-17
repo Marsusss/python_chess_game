@@ -23,6 +23,9 @@ class Game_log:
         self.player_colors = player_colors
         self.boards = []
 
+    def __getitem__(self, turn_number):
+        return self.get_board(turn_number)
+
     def update_log(self, board):
         if not isinstance(board, torch.Tensor):
             raise TypeError("board must be a torch tensor")
@@ -38,13 +41,23 @@ class Game_log:
             "boards": self.boards,
         }
 
-    def get_board(self, turn):
-        if not isinstance(turn, int):
-            raise TypeError("turn must be an integer")
-        if turn < 0:
-            raise ValueError("turn must be greater than or equal to 0")
+    def get_board(self, turn_number):
+        if not isinstance(turn_number, int):
+            raise TypeError(f"turn_number must be an integer, got {type(turn_number)}")
+        if turn_number < 0:
+            raise ValueError(
+                f"turn_number must be greater than or equal to 0, got {turn_number}"
+            )
+        if turn_number >= len(self.boards):
+            raise ValueError(
+                f"turn_number must be less than the number of turns"
+                f"({len(self.boards)}), got {turn_number}"
+            )
 
-        if turn < len(self.boards):
-            return self.boards[turn]
-        else:
-            return None
+        return self.boards[turn_number]
+
+    def get_game_number(self):
+        return self.game_number
+
+    def get_player_colors(self):
+        return self.player_colors
