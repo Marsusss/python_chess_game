@@ -35,6 +35,17 @@ class TestGameLog(unittest.TestCase):
         board = self.log.get_board(0)
         self.assertTrue(torch.equal(board, self.board))
 
+    def test_get_item(self):
+        self.log.update_log(self.board)
+        board = self.log[0]
+        self.assertTrue(torch.equal(board, self.board))
+
+    def test_get_game_number(self):
+        self.assertEqual(self.log.get_game_number(), 1)
+
+    def test_get_player_colors(self):
+        self.assertEqual(self.log.get_player_colors(), {"p1": "white", "p2": "black"})
+
     def test_init_errors(self):
         with self.assertRaises(TypeError):
             Game_log("1", {"p1": "white", "p2": "black"})
