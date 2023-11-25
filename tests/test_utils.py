@@ -1,6 +1,6 @@
 import unittest
 
-from utils import circular_permute_dict_values, get_next_list_element
+from utils.utils import circular_permute_dict_values, get_next_list_element
 
 
 class TestUtils(unittest.TestCase):

@@ -1,58 +1,63 @@
 import torch
 
+import utils.check_utils as check_utils
+
 
 class Game_log:
-    def __init__(self, game_number=0, player_colors=None):
-        if player_colors is None:
-            player_colors = {"p1": "white", "p2": "black"}
-        if not isinstance(game_number, int):
-            raise TypeError("game_number must be an integer")
-        if game_number <= 0:
-            raise ValueError("game_number must be greater than 0")
-        if not isinstance(player_colors, dict):
-            raise TypeError("player_colors must be a dictionary")
-        if "p1" not in player_colors or "p2" not in player_colors:
-            raise ValueError("player_colors must have keys 'p1' and 'p2'")
-        if player_colors["p1"] not in ["white", "black"] or player_colors["p2"] not in [
+    def __init__(self, game_number=0, player_id_to_color=None):
+        if player_id_to_color is None:
+            player_id_to_color = {"p1": "white", "p2": "black"}
+
+        check_utils.check_is_non_negative_int("game_number", game_number)
+        check_utils.check_is_instance("player_id_to_color", player_id_to_color, dict)
+        if "p1" not in player_id_to_color or "p2" not in player_id_to_color:
+            raise ValueError("player_id_to_color must have keys 'p1' and 'p2'")
+        if player_id_to_color["p1"] not in ["white", "black"] or player_id_to_color[
+            "p2"
+        ] not in [
             "white",
             "black",
         ]:
             raise ValueError("player colors must be 'white' or 'black'")
 
         self.game_number = game_number
-        self.player_colors = player_colors
+        self.player_id_to_color = player_id_to_color
         self.boards = []
 
     def __getitem__(self, turn_number):
-        return self.get_board(turn_number)
+        return self.boards[turn_number]
+
+    def __len__(self):
+        return len(self.boards)
+
+    def __iter__(self):
+        return iter(self.boards)
+
+    def __str__(self):
+        return (
+            f"There are {len(self)} boards saved and the first element is:"
+            f" {self.boards[0]}"
+        )
+
+    def __repr__(self):
+        return str(self)
 
     def update_log(self, board):
-        if not isinstance(board, torch.Tensor):
-            raise TypeError("board must be a torch tensor")
+        check_utils.check_is_instance("board_0", board, torch.Tensor)
         if board.shape != (8, 8):
-            raise ValueError("board must be an 8x8 tensor")
+            raise ValueError("board_0 must be an 8x8 tensor")
 
         self.boards.append(board)
 
     def get_log(self):
         return {
             "game_number": self.game_number,
-            "player_colors": self.player_colors,
+            "player_id_to_color": self.player_id_to_color,
             "boards": self.boards,
         }
 
     def get_board(self, turn_number):
-        if not isinstance(turn_number, int):
-            raise TypeError(f"turn_number must be an integer, got {type(turn_number)}")
-        if turn_number < 0:
-            raise ValueError(
-                f"turn_number must be greater than or equal to 0, got {turn_number}"
-            )
-        if turn_number >= len(self.boards):
-            raise ValueError(
-                f"turn_number must be less than the number of turns"
-                f"({len(self.boards)}), got {turn_number}"
-            )
+        check_utils.check_is_index(turn_number, len(self.boards))
 
         return self.boards[turn_number]
 
@@ -60,4 +65,4 @@ class Game_log:
         return self.game_number
 
     def get_player_colors(self):
-        return self.player_colors
+        return self.player_id_to_color

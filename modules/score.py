@@ -1,3 +1,6 @@
+import utils.check_utils as check_utils
+
+
 class Score:
     """
     A class to represent a score in a two-player game.
@@ -29,8 +32,7 @@ class Score:
         else:
             self._score = score
 
-        if not isinstance(self._score, dict):
-            raise TypeError(f"score must be a dict, got {type(self._score)}")
+        check_utils.check_is_instance("score", self._score, dict)
         if "draw" not in self._score.keys():
             raise ValueError(
                 f'score must include a "draw" key, got dict with keys: '
@@ -42,14 +44,7 @@ class Score:
                 f"dict of length {len(self._score)}"
             )
         for key, value in self._score.items():
-            if not isinstance(value, int):
-                raise TypeError(
-                    f'score["{key}"] must be an integer, not {str(type(value))}.'
-                )
-            if value < 0:
-                raise ValueError(
-                    f'Error: score["{key}"] is {value}, should be at least 0'
-                )
+            check_utils.check_is_non_negative_int(f'score["{key}"]', value)
 
     def __getitem__(self, key):
         return self._score[key]
@@ -59,10 +54,7 @@ class Score:
             raise KeyError(
                 f'Invalid key: "{key}". Only {self._score.keys()} are allowed.'
             )
-        if not isinstance(value, int):
-            raise TypeError(f"A score must be an integer, not {str(type(value))}.")
-        if value < 0:
-            raise ValueError(f'Error: score["{key}"] is {value}, should be at least 0')
+        check_utils.check_is_non_negative_int(f'score["{key}"]', value)
         self._score[key] = value
 
     def keys(self):
