@@ -48,14 +48,13 @@ class Game_log:
             raise ValueError(
                 f"turn_number must be greater than or equal to 0, got {turn_number}"
             )
-
-        if turn_number < len(self.boards):
-            return self.boards[turn_number]
-        else:
+        if turn_number >= len(self.boards):
             raise ValueError(
                 f"turn_number must be less than the number of turns"
                 f"({len(self.boards)}), got {turn_number}"
             )
+
+        return self.boards[turn_number]
 
     def get_game_number(self):
         return self.game_number
