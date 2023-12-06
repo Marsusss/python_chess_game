@@ -12,3 +12,19 @@ Ideas:
 * Make containerized players that can act through the endpoint
 * Deploy as application that other players can interact with and log the games
 * Download chess games from chess.com and used supervised learning to train/pretrain on these. This would ease training considerably.
+
+## Create working chess game
+Table of classes and main
+| status | Name | Description | Asignee | Branch |
+|---|---|---|---|---|
+| ✅ | Board        |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
+| ✅ | Score        |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
+| ⏳ | GameLog      |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
+| ⏳ | GameLogList  |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
+| :x: | Rules       |   |   |   |
+| :x: | State       |   |   |   |
+| :x: | Player      |   |   |   |
+| :x: | HumanPlayer |   |   |   |
+| :x: | AiPlayer    |   |   |   |
+| :x: | Model       |   |   |   |
+| :x: | main        |   |   |   |
