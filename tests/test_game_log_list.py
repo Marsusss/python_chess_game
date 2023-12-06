@@ -1,7 +1,6 @@
 import unittest
 
-import torch
-
+from modules.board import Board
 from modules.game_log import Game_log
 from modules.game_log_list import Game_log_list
 
@@ -9,10 +8,12 @@ from modules.game_log_list import Game_log_list
 class TestGameLogList(unittest.TestCase):
     def setUp(self):
         self.log_list = Game_log_list(["white", "black"])
-        self.board_0 = torch.zeros([8, 8])
-        self.board_1 = torch.ones([8, 8])
         self.game_log = Game_log(1, {"p1": "white", "p2": "black"})
-        self.game_log.update_log(self.board_0)
+        self.board_0 = Board(player_colors=["white", "black"])
+        self.boards = [self.board_0]
+        for board in self.boards:
+            self.game_log.update_log(board)
+
         self.game_logs = [self.game_log]
         for game_log in self.game_logs:
             self.log_list.update_list(game_log)
@@ -44,6 +45,7 @@ class TestGameLogList(unittest.TestCase):
 
     def test_update_list(self):
         new_game_log = Game_log(2, {"p1": "black", "p2": "white"})
+        self.board_1 = Board(player_colors=list(new_game_log.player_id_to_color.keys()))
         new_game_log.update_log(self.board_1)
         self.log_list.update_list(new_game_log)
         self.assertEqual(len(self.log_list), 2)

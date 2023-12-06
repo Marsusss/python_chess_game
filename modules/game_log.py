@@ -1,6 +1,5 @@
-import torch
-
 import utils.check_utils as check_utils
+from modules.board import Board
 
 
 class Game_log:
@@ -42,12 +41,20 @@ class Game_log:
     def __repr__(self):
         return str(self)
 
-    def update_log(self, board):
-        check_utils.check_is_instance("board_0", board, torch.Tensor)
-        if board.shape != (8, 8):
-            raise ValueError("board_0 must be an 8x8 tensor")
+    def update_log(self, new_board):
+        check_utils.check_is_instance("board_0", new_board, Board)
+        if len(self) > 0:
+            if not self.boards[0].is_similar_to(new_board):
+                raise ValueError(
+                    f"Expected new board to be similar to other boards:\n "
+                    f"player_colors = {self[0].player_colors},\n "
+                    f"shape = {self[0].board_shape}\n"
+                    f"but got:\n"
+                    f"player_colors = {new_board.player_colors},\n "
+                    f"shape = {new_board.board_shape}\n"
+                )
 
-        self.boards.append(board)
+        self.boards.append(new_board)
 
     def get_log(self):
         return {
@@ -64,5 +71,5 @@ class Game_log:
     def get_game_number(self):
         return self.game_number
 
-    def get_player_colors(self):
+    def get_player_id_to_color(self):
         return self.player_id_to_color
