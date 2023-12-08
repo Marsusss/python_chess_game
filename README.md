@@ -22,7 +22,7 @@ Table of classes and main
 | ✅ | GameLog      |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
 | ✅ | GameLogList  |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
 | :x: | Rules       |   |   |   |
-| :x: | State       |   |   |   |
+| ⏳ | State       |   |   |   |
 | :x: | Player      |   |   |   |
 | :x: | HumanPlayer |   |   |   |
 | :x: | AiPlayer    |   |   |   |
