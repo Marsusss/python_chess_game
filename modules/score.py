@@ -38,11 +38,9 @@ class Score:
                 f'score must include a "draw" key, got dict with keys: '
                 f"{self._score.keys()}"
             )
-        if len(self._score) != 3:
-            raise ValueError(
-                f"score must be a dict of length 3: 2 players and a draw option, got "
-                f"dict of length {len(self._score)}"
-            )
+        check_utils.check_is_iterable_of_unique_elements_with_length(
+            "_score", self._score, dict, 3
+        )
         for key, value in self._score.items():
             check_utils.check_is_non_negative_int(f'score["{key}"]', value)
 

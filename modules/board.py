@@ -73,10 +73,9 @@ class Board:
         check_utils.check_is_instance("player_colors", player_colors, list)
 
         player_color_count = len(self.player_colors)
-        if player_color_count < 2:
-            raise ValueError(
-                f"player_colors must have at least 2 colors, got {player_color_count}"
-            )
+        check_utils.check_is_iterable_of_unique_elements_with_length(
+            "player_colors", self.player_colors, list, min_length=2
+        )
 
         king_bins = self._board[0, :, :] == 1
         if torch.sum(king_bins) != player_color_count:

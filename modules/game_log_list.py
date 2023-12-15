@@ -9,10 +9,9 @@ class Game_log_list:
         else:
             self.player_colors = player_colors
 
-        if len(self.player_colors) < 2:
-            raise ValueError(
-                f"There must be atleast two players, got {len(self.player_colors)}"
-            )
+        check_utils.check_is_iterable_of_unique_elements_with_length(
+            "player_colors", self.player_colors, list, min_length=2
+        )
 
         self.log_list = []
 
@@ -33,11 +32,12 @@ class Game_log_list:
 
     def update_list(self, game_log):
         check_utils.check_is_instance("game_log", game_log, Game_log)
-        if len(game_log.player_id_to_color) != len(self.player_colors):
-            raise ValueError(
-                f"Expected {len(self.player_colors)} colors, got "
-                f"{len(game_log.player_id_to_color)}"
-            )
+        check_utils.check_is_iterable_of_unique_elements_with_length(
+            "game_log.player_id_to_color",
+            game_log.player_id_to_color,
+            dict,
+            len(self.player_colors),
+        )
         for color in game_log.player_id_to_color.values():
             if color not in self.player_colors:
                 raise ValueError(
