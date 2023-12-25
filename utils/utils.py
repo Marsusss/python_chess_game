@@ -29,3 +29,61 @@ def get_next_list_element(input_list, current_element):
 
     else:
         return input_list[current_idx + 1]
+
+
+def slice_to_range(s, length):
+    return range(*s.indices(length))
+
+
+def slice_to_list(s, length):
+    return list(slice_to_range(s, length))
+
+
+def is_non_negative(number):
+    return number >= 0
+
+
+def is_non_negative_int(integer):
+    result = isinstance(integer, int)
+    result &= is_non_negative(integer)
+    return result
+
+
+def is_iterable(iterable):
+    try:
+        iter(iterable)
+    except TypeError:
+        return False
+
+    return True
+
+
+def is_iterable_of_length(
+    iterable, iterable_type, required_length=None, min_length=None, max_length=None
+):
+    if not is_iterable(iterable):
+        return False
+
+    result = isinstance(iterable, iterable_type)
+
+    if required_length is not None:
+        result &= len(iterable) == required_length
+
+    else:
+        if min_length is not None:
+            result &= len(iterable) >= min_length
+
+        if max_length is not None:
+            result &= len(iterable) <= max_length
+
+    return result
+
+
+def is_2d_coordinate(coordinate, max_coordinates=None):
+    result = is_iterable_of_length(coordinate, tuple, 2)
+    for i, dimension in enumerate(coordinate):
+        result &= is_non_negative_int(dimension)
+        if max_coordinates is not None:
+            result &= dimension < max_coordinates[i]
+
+    return result

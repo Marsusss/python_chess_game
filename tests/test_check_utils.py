@@ -10,6 +10,14 @@ class CheckUtilsTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             check_utils.check_is_instance("var", "string", int)
 
+    def test_check_is_instance_of_types(self):
+        self.assertIsNone(
+            check_utils.check_is_instance_of_types("var", "string", (str, int))
+        )
+
+        with self.assertRaises(TypeError):
+            check_utils.check_is_instance_of_types("var", "string", (list, int))
+
     def test_check_is_non_negative(self):
         self.assertIsNone(check_utils.check_is_non_negative("number", 1.1))
 
@@ -30,6 +38,11 @@ class CheckUtilsTests(unittest.TestCase):
 
         with self.assertRaises(IndexError):
             check_utils.check_is_index(7, 5)
+
+        self.assertIsNone(check_utils.check_is_index(slice(0, 5, 2), 5))
+
+        with self.assertRaises(IndexError):
+            check_utils.check_is_index(slice(0, 6, 2), 5)
 
 
 if __name__ == "__main__":

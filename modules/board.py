@@ -1,119 +1,52 @@
 import copy
 
-import torch
-
 import utils.check_utils as check_utils
+import utils.utils as utils
+from modules.chess_piece import ChessPiece
+from modules.king import King
+from modules.pawn import Pawn
 
 
 class Board:
     def __init__(self, player_colors, board=None):
-        # I want to define _board as a pure 4x8x8 tensor for later operations
-        # I am sacrificing fast interpretability and visualization to save later
-        # Computation power when it needs to be trained on. I only add an extra
-        # unnecessary dimension, the id dimension for tracking purposes necessary
-        # to track pawn transformations.
+        check_utils.check_is_iterable_of_unique_elements_with_length(
+            "player_colors", player_colors, list, min_length=2
+        )
+        self.player_colors = player_colors
+
         if board is None:
-            self._board = torch.tensor(
-                [
-                    [
-                        [3, 5, 4, 2, 1, 4, 5, 3],  # black pieces
-                        [6, 6, 6, 6, 6, 6, 6, 6],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [6, 6, 6, 6, 6, 6, 6, 6],
-                        [3, 5, 4, 2, 1, 4, 5, 3],  # white pieces
-                    ],
-                    [
-                        [2, 2, 2, 2, 2, 2, 2, 2],  # black color
-                        [2, 2, 2, 2, 2, 2, 2, 2],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1],  # white color
-                    ],
-                    [
-                        [0, 0, 0, 0, 0, 0, 0, 0],  # black states
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],  # white states
-                    ],
-                    [
-                        [1, 2, 3, 4, 5, 6, 7, 8],  # black ids
-                        [9, 10, 11, 12, 13, 14, 15, 16],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 0, 0, 0],
-                        [17, 18, 19, 20, 21, 22, 23, 24],
-                        [25, 26, 27, 28, 29, 30, 31, 32],  # white ids
-                    ],
-                ],
-                dtype=torch.uint8,
-            )
+            self._board = [[None for _ in range(8)] for _ in range(8)]
+            self._board[0][4] = King((0, 4), player_colors[0], 4)
+            self._board[7][4] = King((7, 4), player_colors[1], 3 * 8 + 4)
+            self._board[1] = [
+                Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)
+            ]
+            self._board[6] = [
+                Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
+            ]
         else:
             self._board = board
 
-        self.player_colors = player_colors
-
-        check_utils.check_is_instance("board_0", self._board, torch.Tensor)
-        if self._board.dtype != torch.uint8:
-            raise TypeError(
-                f"_board must be a Tensor of dtype uint8, got Tensor of dtype"
-                f" {self._board.dtype}"
-            )
-
-        check_utils.check_is_instance("player_colors", player_colors, list)
-
-        player_color_count = len(self.player_colors)
-        check_utils.check_is_iterable_of_unique_elements_with_length(
-            "player_colors", self.player_colors, list, min_length=2
+        check_utils.check_is_iterable_of_length(
+            "board", self._board, list, min_length=3, max_length=20
         )
+        check_utils.check_is_iterable_of_length(
+            "row_0", self._board[0], list, min_length=3, max_length=20
+        )
+        row_length = len(self._board[0])
+        for i, row in enumerate(self._board[1:]):
+            check_utils.check_is_iterable_of_length(f"row_{i}", row, list, row_length)
 
-        king_bins = self._board[0, :, :] == 1
-        if torch.sum(king_bins) != player_color_count:
-            raise ValueError(
-                f"There must be as many kings ({torch.sum(king_bins)}) "
-                f"as player_colors"
-            )
-        if (
-            len(torch.unique_consecutive(self._board[1, :, :][king_bins]) - 1)
-            != player_color_count
-        ):
-            raise ValueError(
-                f"All kings {sum(king_bins)} must be of different color, "
-                f"but got only {len(torch.unique(self._board[1,:,:][king_bins]))} "
-                f"consecutive distinct"
-            )
+        self.piece_dict = self.construct_piece_dict()
+        for player_color in self.player_colors:
+            try:
+                check_utils.check_is_iterable_of_length(
+                    "King_list", self.piece_dict[(player_color, "king")], list, 1
+                )
+            except KeyError:
+                raise ValueError(f"{player_color} player doesn't have a king")
 
-        if len(torch.unique(self._board[1, :, :])) - 1 != player_color_count:
-            raise ValueError(
-                f"The number of colors in player_colors {len(self.player_colors)}"
-                f" must be the same as the number of colors on the board_0 "
-                f"{len(torch.unique(self._board[1,:, :])) - 1}"
-            )
-        if self._board.shape[0] != 4:
-            raise TypeError(
-                f"The board_0 must have 4 layers, got {self._board.shape[0]}"
-            )
-        if min(self._board.shape[1:]) < 3:
-            raise TypeError(
-                f"The board_0 must be at least 3x3, got {self._board.shape[1:]}"
-            )
-        if max(self._board.shape[1:]) > 20:
-            raise TypeError(
-                f"The board_0 must be at most 20x20, got {self._board.shape[1:]}"
-            )
-
-        player_color_ids = torch.unique(self._board[1, :, :][self._board[1, :, :] != 0])
-        self.player_color_id_to_color = dict(zip(player_color_ids, self.player_colors))
+        self.board_shape = (len(self._board), row_length)
 
         alphabet = [
             "a",
@@ -138,10 +71,9 @@ class Board:
             "t",
         ]
         self.letter_to_column = {
-            letter: i for i, letter in enumerate(alphabet[: self._board.shape[2]])
+            letter: i for i, letter in enumerate(alphabet[: self.board_shape[1]])
         }
-        self.letters = self.letter_to_column.keys()
-        self.board_shape = self._board.shape
+        self.letters = list(self.letter_to_column.keys())
 
     def __copy__(self):
         new_copy = Board(player_colors=self.player_colors, board=self._board)
@@ -149,21 +81,77 @@ class Board:
 
     def __deepcopy__(self, memodict={}):
         new_copy = Board(
-            player_colors=copy.deepcopy(self.player_colors), board=self._board.clone()
+            player_colors=copy.deepcopy(self.player_colors),
+            board=copy.deepcopy(self._board),
         )
         return new_copy
 
+    def __len__(self):
+        return len(self._board)
+
     def __getitem__(self, coordinates):
+        check_utils.check_is_instance_of_types("coordinates", coordinates, (tuple, str))
         if isinstance(coordinates, str):
             return self.get_piece_by_string(coordinates)
 
-        return self._board[:, coordinates[0], coordinates[1]]
+        for coordinate in coordinates:
+            check_utils.check_is_instance_of_types(
+                "coordinates", coordinate, (int, slice)
+            )
+
+        if isinstance(coordinates[0], slice):
+            return [row[coordinates[1]] for row in self._board[coordinates[0]]]
+
+        check_utils.check_is_non_negative("row_coordinate", coordinates[0])
+
+        return self._board[coordinates[0]][coordinates[1]]
+
+    def __setitem__(self, coordinates, piece):
+        if piece is not None:
+            check_utils.check_is_instance("ChessPiece", piece, ChessPiece)
+
+        check_utils.check_is_instance_of_types("coordinates", coordinates, (tuple, str))
+        if isinstance(coordinates, str):
+            coordinates = self.string_to_coordinate(coordinates)
+
+        for coordinate in coordinates:
+            check_utils.check_is_instance_of_types(
+                "coordinates", coordinate, (int, slice)
+            )
+
+        if isinstance(coordinates[0], slice):
+            coordinate_0_list = utils.slice_to_list(coordinates[0], len(self))
+        else:
+            coordinate_0_list = [coordinates[0]]
+
+        if isinstance(coordinates[1], slice):
+            coordinate_1_list = utils.slice_to_list(coordinates[1], self.board_shape[1])
+        else:
+            coordinate_1_list = [coordinates[1]]
+
+        for row in coordinate_0_list:
+            for column in coordinate_1_list:
+                self._board[row][column] = piece
+
+    def __iter__(self):
+        return iter(self._board)
 
     def __str__(self):
         return self.board_as_string()
 
     def __repr__(self):
         return str(self)
+
+    def construct_piece_dict(self):
+        piece_dict = {}
+        for i, row in enumerate(self._board):
+            for j, piece in enumerate(row):
+                if piece is not None:
+                    key = (piece["color"], piece["type"])
+                    if key not in piece_dict:
+                        piece_dict[key] = []
+                    piece_dict[key].append((i, j))
+        return piece_dict
 
     def string_to_coordinate(self, coordinate_string):
         if (
@@ -188,7 +176,28 @@ class Board:
         return coordinate
 
     def board_as_string(self):
-        return str(self._board)
+        board_string = "\n"  # Start with a newline
+        for row in self._board:
+            for piece in row:
+                if piece is None:
+                    board_string += "O "  # Add an 'O' and a space for empty squares
+                else:
+                    board_string += (
+                        piece.symbol + " "
+                    )  # Add the piece's symbol and a space
+            board_string += "\n"  # Add a newline at the end of each row
+        return board_string
+
+    def display(self):
+        print(self.board_as_string())
+
+    def piece_as_string(
+        self, piece_position
+    ):  # THIS SHOULD RETURN STRING REPR OF PIECE
+        check_utils.check_is_iterable_of_length(
+            "piece_position", piece_position, tuple, 2
+        )
+        return "MOCKED"
 
     def get_board(self):
         return self._board
@@ -200,21 +209,36 @@ class Board:
         coordinate = self.string_to_coordinate(coordinate_string)
         return self.get_piece(coordinate)
 
+    def is_occupied(self, coordinate):
+        check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
+        return isinstance(self[coordinate], ChessPiece)
+
+    def is_on_board(self, coordinate):
+        return utils.is_2d_coordinate(coordinate, self.board_shape)
+
     def move_piece(self, old_coordinate, new_coordinate):
         for coordinate in [old_coordinate, new_coordinate]:
-            for i, index in enumerate(coordinate):
-                check_utils.check_is_index(index, self.board_shape[i + 1])
+            check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
 
-        if torch.equal(self[old_coordinate], torch.tensor([0, 0, 0, 0])):
+        if not self.is_occupied(old_coordinate):
             raise ValueError(
-                f"Expected board[{old_coordinate}] to be non-empty, got "
-                f"{self[old_coordinate]}"
+                f"expected old coordinate {old_coordinate} to be"
+                f" occupied, got {self[old_coordinate]}"
             )
 
-        self._board[:, new_coordinate[0], new_coordinate[1]] = self[old_coordinate]
-        self._board[:, old_coordinate[0], old_coordinate[1]] = 0
+        self[old_coordinate].move(new_coordinate, self)
+        if (
+            isinstance(self[old_coordinate], Pawn)
+            and new_coordinate[1] != old_coordinate[1]
+            and not self.is_occupied(new_coordinate)
+        ):
+            self._board[old_coordinate[0]][new_coordinate[1]] = None
+
+        self._board[new_coordinate[0]][new_coordinate[1]] = self[old_coordinate]
+        self._board[old_coordinate[0]][old_coordinate[1]] = None
 
     def is_similar_to(self, other):
+        check_utils.check_is_instance("Other_board", other, Board)
         if self.player_colors != other.player_colors:
             return False
         if self.board_shape != other.board_shape:
