@@ -5,9 +5,8 @@ from modules.board import Board
 from modules.pawn import Pawn
 
 
-class TestChessPiece(unittest.TestCase):
+class TestPawn(unittest.TestCase):
     def setUp(self):
-        self.pawn = Pawn((0, 0), "black", 1, "down")
         self.board = Board(["black", "white"])
         self.pawn = self.board[1, 0]
 
@@ -16,13 +15,14 @@ class TestChessPiece(unittest.TestCase):
         self.assertEqual(self.pawn.piece_type, "pawn")
         self.assertEqual(self.pawn.color, "black")
         self.assertEqual(self.pawn.id, 8)
-        self.assertEqual(self.pawn.state["just_double_moved"], False)
+        self.assertEqual(self.pawn.state["is_en_passant_able"], False)
         self.assertEqual(self.pawn.forward_direction, (1, 0))
 
     def test_deepcopy(self):
         deepcopy_piece = copy.deepcopy(self.pawn)
         self.assertIsNot(deepcopy_piece, self.pawn)
-        self.assertEqual(deepcopy_piece.dict, self.pawn.dict)
+        for attr, value in vars(self.pawn).items():
+            self.assertEqual(value, getattr(deepcopy_piece, attr))
 
     def test_get_allowed_moves(self):
         # Testing get single and double move
@@ -41,8 +41,9 @@ class TestChessPiece(unittest.TestCase):
         # Test en passant, just use print(self.board) to see what is happening.
         self.board._board[2][1] = None
         self.board._board[1][1] = Pawn((1, 1), "white", 41, "up")
-        self.board._board[1][1]["state"]["just_double_moved"] = True
+        self.board._board[1][1]["state"]["is_en_passant_able"] = True
         self.assertEqual(self.pawn.get_allowed_moves(self.board), [(2, 1)])
+        self.assertEqual(self.pawn.en_passant_cache, {(2, 1): (1, 1)})
 
     def test_move(self):
         self.pawn.move((2, 0), self.board)
@@ -50,6 +51,9 @@ class TestChessPiece(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.pawn.move((2, 1), self.board)
+
+        self.board[1, 1].move((3, 1), self.board)
+        self.assertFalse(self.board[1, 1].state["is_en_passant_able"])
 
 
 if __name__ == "__main__":

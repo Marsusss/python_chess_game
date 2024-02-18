@@ -77,6 +77,14 @@ class ChessPiece:
         )
         return new_copy
 
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return self.dict == other.dict
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __getitem__(self, item):
         return self.dict[item]
 
@@ -94,7 +102,7 @@ class ChessPiece:
         if board[self.position] != self:
             raise ValueError(
                 f"Expected board[position] to be this piece ({repr(self)}), "
-                f"but got {board.piece_as_string()}"
+                f"but got {board[self.position]}"
             )
 
         check_utils.check_is_iterable_of_length(

@@ -79,6 +79,14 @@ class TestBoard(unittest.TestCase):
         self.board[1:3, 2:4] = None
         self.assertEqual(self.board[1:3, 2:4], [[None, None], [None, None]])
 
+        self.board[1] = [
+            Pawn((1, i), self.board.player_colors[0], 8 + i, "down") for i in range(8)
+        ]
+        for i, element in enumerate(self.board[1, :]):
+            self.assertEqual(
+                element, Pawn((1, i), self.board.player_colors[0], 8 + i, "down")
+            )
+
     def test_str(self):
         self.assertEqual(str(self.board), self.board.board_as_string())
 
@@ -116,7 +124,9 @@ class TestBoard(unittest.TestCase):
 
         # Test en passant
         self.board._board[2][1] = Pawn((2, 1), "black", 40, "up")
-        self.board._board[2][1]["state"]["just_double_moved"] = True
+        self.board._board[2][1]["state"]["is_en_passant_able"] = True
+
+        self.board.en_passant_cache = (2, 1)
         self.board.move_piece((2, 0), (3, 1))
         self.assertEqual(self.board[3, 1], pawn)
         self.assertEqual(self.board[2, 1], None)
@@ -197,6 +207,59 @@ class TestBoard(unittest.TestCase):
             self.board.string_to_coordinate("invalid")  # too long
         with self.assertRaises(KeyError):
             self.board.string_to_coordinate("z1")  # invalid letter
+
+    def test_get_piece_as_list(self):
+        with self.assertRaises(TypeError):
+            self.board.get_piece_as_list(1)
+
+        self.assertEqual([0, 6, 0], self.board.get_piece_as_list(None))
+
+        pawn = Pawn((2, 1), "black", 40, "up")
+        self.assertEqual(
+            [
+                self.board.player_colors.index(pawn["color"]),
+                list(pawn.symbol_schema.keys()).index(pawn["type"]),
+                0,
+            ],
+            self.board.get_piece_as_list(pawn),
+        )
+
+        pawn["state"]["has_moved"] = True
+        pawn["state"]["is_en_passant_able"] = True
+        self.assertEqual(
+            [
+                self.board.player_colors.index(pawn["color"]),
+                list(pawn.symbol_schema.keys()).index(pawn["type"]),
+                2,
+            ],
+            self.board.get_piece_as_list(pawn),
+        )
+
+        king = King((0, 0), "white", 1)
+        self.assertEqual(
+            [
+                self.board.player_colors.index(king["color"]),
+                list(king.symbol_schema.keys()).index(king["type"]),
+                0,
+            ],
+            self.board.get_piece_as_list(king),
+        )
+
+    def test_update_board_as_list(self):
+        position = (1, 0)
+        color = "black"
+        id = 1
+        self.board[1, 0] = None
+        self.board[2, 0] = Pawn(position, color, id, "up")
+        self.board.update_board_as_list((1, 0), (2, 0))
+        self.assertEqual([0, 6, 0], self.board.board_as_list[1][0])
+        self.assertEqual([1, 5, 0], self.board.board_as_list[2][0])
+
+        color = "white"
+        self.board[2, 0] = King(position, color, id)
+        self.board.update_board_as_list((1, 0), (2, 0))
+        self.assertEqual([0, 6, 0], self.board.board_as_list[1][0])
+        self.assertEqual([0, 0, 0], self.board.board_as_list[2][0])
 
 
 if __name__ == "__main__":

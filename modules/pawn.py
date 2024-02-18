@@ -7,7 +7,7 @@ class Pawn(ChessPiece):
     def __init__(self, position, color, id, forward_direction):
         super().__init__(position, "pawn", color, id)
         self.state["has_moved"] = False
-        self.state["just_double_moved"] = False
+        self.state["is_en_passant_able"] = False
         forward_directions = {"up": (-1, 0), "down": (1, 0)}
         if forward_direction not in forward_directions.keys():
             raise ValueError(
@@ -16,21 +16,22 @@ class Pawn(ChessPiece):
                 f"got {forward_direction}"
             )
 
-        self.state["forward_direction"] = forward_direction
         self.forward_direction = forward_directions[forward_direction]
+        self.en_passant_cache = None
 
     def __deepcopy__(self, memodict={}):
         deepcopy = super().__deepcopy__()
         deepcopy.state["has_moved"] = copy.deepcopy(self.state["has_moved"])
-        deepcopy.state["just_double_moved"] = copy.deepcopy(
-            self.state["just_double_moved"]
+        deepcopy.state["is_en_passant_able"] = copy.deepcopy(
+            self.state["is_en_passant_able"]
         )
-        deepcopy.state["forward_direction"] = copy.deepcopy(
-            self.state["forward_direction"]
-        )
+        deepcopy.forward_direction = copy.deepcopy(self.forward_direction)
+        deepcopy.en_passant_cache = copy.deepcopy(self.en_passant_cache)
+
         return deepcopy
 
     def get_allowed_moves(self, board):
+        super().get_allowed_moves(board)
         allowed_moves = []
 
         new_position = (self.position[0] + self.forward_direction[0], self.position[1])
@@ -63,12 +64,26 @@ class Pawn(ChessPiece):
                         board[neighbouring_position].color != self.color
                         and board[neighbouring_position]["type"] == "pawn"
                     ):
-                        if board[neighbouring_position]["state"]["just_double_moved"]:
+                        if board[neighbouring_position]["state"]["is_en_passant_able"]:
                             allowed_moves.append(new_position)
+                            self.en_passant_cache = {
+                                new_position: neighbouring_position
+                            }
 
         return allowed_moves
 
     def move(self, new_position, board):  # NOT TESTABLE
         super().move(new_position, board)
+        if self.en_passant_cache is not None and new_position in self.en_passant_cache:
+            board.en_passant_kill(self.en_passant_cache[new_position])
+
         self.state["has_moved"] = True
-        self.state["just_double_moved"] = abs(new_position[0] - self.position[0]) == 2
+        just_double_moved = abs(new_position[0] - self.position[0]) == 2
+        if just_double_moved:
+            for dx in [-1, 1]:
+                if board.is_on_board_and_occupied_by(
+                    new_position, not_by_player_color=[self["color"]]
+                ):
+                    self.state["is_en_passant_able"] = True
+
+        self.en_passant_cache = None

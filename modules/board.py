@@ -16,6 +16,7 @@ class Board:
 
         if board is None:
             self._board = [[None for _ in range(8)] for _ in range(8)]
+            self.board_shape = (len(self._board), len(self._board[0]))
             self._board[0][4] = King((0, 4), player_colors[0], 4)
             self._board[7][4] = King((7, 4), player_colors[1], 3 * 8 + 4)
             self._board[1] = [
@@ -24,8 +25,16 @@ class Board:
             self._board[6] = [
                 Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
             ]
+            self._board = [[None for _ in range(8)] for _ in range(8)]
+            self[0, 4] = King((0, 4), player_colors[0], 4)
+            self[7, 4] = King((7, 4), player_colors[1], 3 * 8 + 4)
+            self[1] = [Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)]
+            self[6] = [
+                Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
+            ]
         else:
             self._board = board
+            self.board_shape = (len(self._board), len(self._board[0]))
 
         check_utils.check_is_iterable_of_length(
             "board", self._board, list, min_length=3, max_length=20
@@ -33,9 +42,11 @@ class Board:
         check_utils.check_is_iterable_of_length(
             "row_0", self._board[0], list, min_length=3, max_length=20
         )
-        row_length = len(self._board[0])
+
         for i, row in enumerate(self._board[1:]):
-            check_utils.check_is_iterable_of_length(f"row_{i}", row, list, row_length)
+            check_utils.check_is_iterable_of_length(
+                f"row_{i}", row, list, self.board_shape[1]
+            )
 
         self.piece_dict = self.construct_piece_dict()
         for player_color in self.player_colors:
@@ -45,8 +56,6 @@ class Board:
                 )
             except KeyError:
                 raise ValueError(f"{player_color} player doesn't have a king")
-
-        self.board_shape = (len(self._board), row_length)
 
         alphabet = [
             "a",
@@ -74,6 +83,15 @@ class Board:
             letter: i for i, letter in enumerate(alphabet[: self.board_shape[1]])
         }
         self.letters = list(self.letter_to_column.keys())
+
+        self.board_as_list = [
+            [self.get_piece_as_list(None) for _c in range(self.board_shape[1])]
+            for _r in range(self.board_shape[0])
+        ]
+        for i, row in enumerate(self):
+            for j, column in enumerate(row):
+                if column is not None:
+                    self.board_as_list[i][j] = self.get_piece_as_list(self[i, j])
 
     def __copy__(self):
         new_copy = Board(player_colors=self.player_colors, board=self._board)
@@ -108,11 +126,19 @@ class Board:
 
     def __setitem__(self, coordinates, piece):
         if piece is not None:
-            check_utils.check_is_instance("ChessPiece", piece, ChessPiece)
+            check_utils.check_is_instance_of_types(
+                "ChessPiece", piece, (ChessPiece, list)
+            )
 
-        check_utils.check_is_instance_of_types("coordinates", coordinates, (tuple, str))
+        check_utils.check_is_instance_of_types(
+            "coordinates", coordinates, (tuple, int, str)
+        )
         if isinstance(coordinates, str):
             coordinates = self.string_to_coordinate(coordinates)
+
+        if isinstance(coordinates, int):
+            check_utils.check_is_instance("List of pieces", piece, list)
+            coordinates = (coordinates, slice(None))
 
         for coordinate in coordinates:
             check_utils.check_is_instance_of_types(
@@ -129,9 +155,13 @@ class Board:
         else:
             coordinate_1_list = [coordinates[1]]
 
-        for row in coordinate_0_list:
-            for column in coordinate_1_list:
-                self._board[row][column] = piece
+        if isinstance(piece, ChessPiece) or piece is None:
+            for row in coordinate_0_list:
+                for column in coordinate_1_list:
+                    self._board[row][column] = piece
+        else:
+            for row in coordinate_0_list:
+                self._board[row] = piece
 
     def __iter__(self):
         return iter(self._board)
@@ -191,14 +221,6 @@ class Board:
     def display(self):
         print(self.board_as_string())
 
-    def piece_as_string(
-        self, piece_position
-    ):  # THIS SHOULD RETURN STRING REPR OF PIECE
-        check_utils.check_is_iterable_of_length(
-            "piece_position", piece_position, tuple, 2
-        )
-        return "MOCKED"
-
     def get_board(self):
         return self._board
 
@@ -216,6 +238,31 @@ class Board:
     def is_on_board(self, coordinate):
         return utils.is_2d_coordinate(coordinate, self.board_shape)
 
+    def is_on_board_and_occupied_by(
+        self, coordinate, by_player_color=None, not_by_player_color=None
+    ):
+        check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
+
+        is_on_board_and_occupied = self.is_on_board(coordinate) and self.is_occupied(
+            coordinate
+        )
+        if is_on_board_and_occupied:
+            if not_by_player_color is not None:
+                check_utils.check_is_instance(
+                    "not_by_player_color", not_by_player_color, list
+                )
+                if self[coordinate]["color"] in not_by_player_color:
+                    return False
+
+            if by_player_color is not None:
+                check_utils.check_is_instance("by_player_color", by_player_color, list)
+                if not self[coordinate]["color"] in by_player_color:
+                    return False
+
+            return True
+
+        return False
+
     def move_piece(self, old_coordinate, new_coordinate):
         for coordinate in [old_coordinate, new_coordinate]:
             check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
@@ -227,15 +274,14 @@ class Board:
             )
 
         self[old_coordinate].move(new_coordinate, self)
-        if (
-            isinstance(self[old_coordinate], Pawn)
-            and new_coordinate[1] != old_coordinate[1]
-            and not self.is_occupied(new_coordinate)
-        ):
-            self._board[old_coordinate[0]][new_coordinate[1]] = None
 
         self._board[new_coordinate[0]][new_coordinate[1]] = self[old_coordinate]
         self._board[old_coordinate[0]][old_coordinate[1]] = None
+        self.update_board_as_list(new_coordinate, old_coordinate)
+
+    def en_passant_kill(self, target):
+        self[target] = None
+        self.board_as_list[target[0]][target[1]] = self.get_piece_as_list(self[target])
 
     def is_similar_to(self, other):
         check_utils.check_is_instance("Other_board", other, Board)
@@ -244,3 +290,24 @@ class Board:
         if self.board_shape != other.board_shape:
             return False
         return True
+
+    def get_piece_as_list(self, piece):
+        if piece is None:
+            return [0, 6, 0]
+        check_utils.check_is_instance("ChessPiece", piece, ChessPiece)
+        color_idx = self.player_colors.index(piece["color"])
+        piece_idx = list(piece.symbol_schema.keys()).index(piece["type"])
+        state_idx = 0
+        for i, value in enumerate(piece["state"].values()):
+            if value:
+                state_idx = i + 1
+
+        return [color_idx, piece_idx, state_idx]
+
+    def update_board_as_list(self, new_coordinate, old_coordinate):
+        self.board_as_list[new_coordinate[0]][
+            new_coordinate[1]
+        ] = self.get_piece_as_list(self[new_coordinate])
+        self.board_as_list[old_coordinate[0]][
+            old_coordinate[1]
+        ] = self.get_piece_as_list(self[old_coordinate])
