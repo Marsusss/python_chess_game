@@ -1,11 +1,6 @@
 name: tests
 
-on:
-  pull_request:
-    paths:
-      - '**.py'
-      - '.github/workflows/tests.yml'
-      - 'requirements.txt'
+on: [pull_request]
 
 jobs:
   tests:
