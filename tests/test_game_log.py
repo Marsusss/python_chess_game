@@ -16,24 +16,24 @@ class TestGameLog(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.log.game_number, 1)
         self.assertEqual(self.log.player_id_to_color, {"p1": "white", "p2": "black"})
-        self.assertEqual(self.log.boards, [self.board_0])
+        self.assertEqual(self.log.boards, [self.board_0.board_as_list])
 
     def test_len(self):
         self.assertEqual(len(self.log), len(self.log.boards))
 
     def test_iter(self):
         for i, log_entry in enumerate(self.log):
-            self.assertTrue(log_entry == self.boards[i])
+            self.assertTrue(log_entry == self.boards[i].board_as_list)
 
         self.assertEqual(i, len(self.log) - 1)
 
-    # def test_update_log(self):
-    # current_log_length = len(self.log.boards)
-    # self.board_1 = copy.deepcopy(self.board_0)
-    # self.board_1.move_piece((0, 0), (1, 1))
-    # self.log.update_log(self.board_1)
-    # self.assertEqual(len(self.log.boards), current_log_length + 1)
-    # self.assertTrue(self.log[-1] == self.board_1)
+    def test_update_log(self):
+        current_log_length = len(self.log.boards)
+        self.board_1 = copy.deepcopy(self.board_0)
+        self.board_1.move_piece((1, 1), (3, 1))
+        self.log.update_log(self.board_1)
+        self.assertEqual(len(self.log.boards), current_log_length + 1)
+        self.assertTrue(self.log[-1] == self.board_1.board_as_list)
 
     def test_get_log(self):
         log = self.log.get_log()
@@ -46,13 +46,12 @@ class TestGameLog(unittest.TestCase):
 
     def test_get_item(self):
         self.board_1 = copy.deepcopy(self.board_0)
-        # self.board_1.move_piece((0, 0), (1, 1))
-        # self.log.update_log(self.board_1)
-        # self.assertEqual(self.log[:], self.log.boards[:])
+        self.board_1.move_piece((1, 0), (2, 0))
+        self.log.update_log(self.board_1)
+        self.assertEqual(self.log[:], self.log.boards[:])
 
     def test_get_board(self):
-        board = self.log.get_board(0)
-        self.assertTrue(board == self.boards[0])
+        self.assertTrue(self.log.get_board(0) == self.log[0])
 
     def test_get_game_number(self):
         self.assertEqual(self.log.get_game_number(), self.log.game_number)
@@ -69,8 +68,6 @@ class TestGameLog(unittest.TestCase):
             Game_log(1, ["white", "black"])
         with self.assertRaises(ValueError):
             Game_log(1, {"p1": "white"})
-        with self.assertRaises(ValueError):
-            Game_log(1, {"p1": "green", "p2": "black"})
 
     def test_update_log_errors(self):
         with self.assertRaises(TypeError):

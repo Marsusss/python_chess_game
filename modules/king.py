@@ -9,7 +9,11 @@ class King(ChessPiece):
         self.state["has_moved"] = False
 
     def __deepcopy__(self, memodict={}):
-        deepcopy = super().__deepcopy__()
+        deepcopy = King(
+            copy.deepcopy(self.position),
+            copy.deepcopy(self.color),
+            copy.deepcopy(self.id),
+        )
         deepcopy.state["has_moved"] = copy.deepcopy(self.state["has_moved"])
         return deepcopy
 

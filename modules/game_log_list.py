@@ -43,6 +43,7 @@ class Game_log_list:
                 raise ValueError(
                     f"{color} is not in player_colors " f"{self.player_colors}"
                 )
+
         self.log_list.append(game_log)
 
     def list_as_string(self):

@@ -20,7 +20,19 @@ class Pawn(ChessPiece):
         self.en_passant_cache = None
 
     def __deepcopy__(self, memodict={}):
-        deepcopy = super().__deepcopy__()
+        if self.forward_direction == (1, 0):
+            forward_direction = "down"
+        elif self.forward_direction == (-1, 0):
+            forward_direction = "up"
+        else:
+            raise ValueError("forward direction is neither up nor down!")
+
+        deepcopy = Pawn(
+            copy.deepcopy(self.position),
+            copy.deepcopy(self.color),
+            copy.deepcopy(self.id),
+            copy.deepcopy(forward_direction),
+        )
         deepcopy.state["has_moved"] = copy.deepcopy(self.state["has_moved"])
         deepcopy.state["is_en_passant_able"] = copy.deepcopy(
             self.state["is_en_passant_able"]

@@ -1,5 +1,3 @@
-import copy
-
 import utils.check_utils as check_utils
 
 
@@ -67,15 +65,6 @@ class ChessPiece:
             "symbol": self.symbol,
             "id": self.id,
         }
-
-    def __deepcopy__(self, memodict={}):
-        new_copy = ChessPiece(
-            copy.deepcopy(self.position),
-            copy.deepcopy(self.piece_type),
-            copy.deepcopy(self.color),
-            copy.deepcopy(self.id),
-        )
-        return new_copy
 
     def __eq__(self, other):
         if type(self) is type(other):

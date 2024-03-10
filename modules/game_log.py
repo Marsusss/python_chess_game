@@ -8,16 +8,9 @@ class Game_log:
             player_id_to_color = {"p1": "white", "p2": "black"}
 
         check_utils.check_is_non_negative_int("game_number", game_number)
-        check_utils.check_is_instance("player_id_to_color", player_id_to_color, dict)
-        if "p1" not in player_id_to_color or "p2" not in player_id_to_color:
-            raise ValueError("player_id_to_color must have keys 'p1' and 'p2'")
-        if player_id_to_color["p1"] not in ["white", "black"] or player_id_to_color[
-            "p2"
-        ] not in [
-            "white",
-            "black",
-        ]:
-            raise ValueError("player colors must be 'white' or 'black'")
+        check_utils.check_is_iterable_of_length(
+            "player_id_to_color", player_id_to_color, dict, min_length=2
+        )
 
         self.game_number = game_number
         self.player_id_to_color = player_id_to_color
@@ -42,19 +35,30 @@ class Game_log:
         return str(self)
 
     def update_log(self, new_board):
-        check_utils.check_is_instance("board_0", new_board, Board)
+        check_utils.check_is_instance("new_board", new_board, Board)
+        self.check_board_is_similar(new_board)
+
+        self.boards.append(new_board.board_as_list)
+
+    def check_board_is_similar(self, board):
         if len(self) > 0:
-            if not self.boards[0].is_similar_to(new_board):
+            if (len(self.boards[0]), len(self.boards[0][0])) != board.board_shape:
                 raise ValueError(
                     f"Expected new board to be similar to other boards:\n "
-                    f"player_colors = {self[0].player_colors},\n "
-                    f"shape = {self[0].board_shape}\n"
+                    f"shape = {(len(self.boards[0]), len(self.boards[0][0]))}\n"
                     f"but got:\n"
-                    f"player_colors = {new_board.player_colors},\n "
-                    f"shape = {new_board.board_shape}\n"
+                    f"shape = {board.board_shape}\n"
                 )
 
-        self.boards.append(new_board)
+            current_colors = self.player_id_to_color.values()
+            for color in board.player_colors:
+                if color not in current_colors:
+                    raise ValueError(
+                        f"Expected new board to be similar to other boards:\n "
+                        f"player_colors = {self.player_id_to_color.values()},\n"
+                        f"but got:\n"
+                        f"player_colors = {board.player_colors}"
+                    )
 
     def get_log(self):
         return {

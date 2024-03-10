@@ -15,21 +15,21 @@ Ideas:
 
 ## Create a working chess game
 Table of classes and main with progress
-| status | Name | Description | Asignee | Branch |
+| status | Name | Description | Assignee | Branch |
 |---|---|---|---|---|
-| ✅ | ChessPiece   |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| ✅ | King         |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| ✅ | Pawn         |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| :x: | Bishop      |   |   |   |
+| ✅ | ChessPiece   |   |   |   |
+| ✅ | King         |   |   |   |
+| ✅ | Pawn         |   |   |   |
+| :x: | Bishop      |   | thelodberg |   |
 | :x: | Knight      |   |   |   |
 | :x: | Rook        |   |   |   |
 | :x: | Queen       |   |   |   |
-| ✅ | Board        |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| ✅ | Score        |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| ⏳ | GameLog      |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
-| ⏳ | GameLogList  |   |   | [feat/Add-game-log-and-score-classes](https://github.com/Marsusss/python_chess_ai/tree/feat/Add-game-log-and-score-classes) |
+| ✅ | Board        |   |   |   |
+| ✅ | Score        |   |   |   |
+| ✅ | GameLog      |   |   |   |
+| ✅ | GameLogList  |   |   |   |
 | :x: | Rules       |   |   |   |
-| ⏳ | State       |   |   |   |
+| :x: | State       |   |   |   |
 | :x: | Player      |   |   |   |
 | :x: | HumanPlayer |   |   |   |
 | :x: | AiPlayer    |   |   |   |
