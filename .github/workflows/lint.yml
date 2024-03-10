@@ -18,7 +18,7 @@ jobs:
       uses: py-actions/flake8@v2
       with:
         max-line-length: "88"
-        ignore: "E402"
+        ignore: "E402,W503"
 
     - name: isort lint
       uses: isort/isort-action@v1
