@@ -13,6 +13,9 @@ Ideas:
 * Deploy as application that other players can interact with and log the games
 * Download chess games from chess.com and use supervised learning to train/pretrain on these. This would ease training considerably.
 
+## Illustration of classes
+![Classes](images/chess_classes.png?raw=true "Classes")
+
 ## Create a working chess game
 Table of classes and main with progress
 | status | Name | Description | Assignee | Branch |
@@ -29,7 +32,7 @@ Table of classes and main with progress
 | ✅ | GameLog      |   |   |   |
 | ✅ | GameLogList  |   |   |   |
 | :x: | Rules       |   |   |   |
-| :x: | State       |   |   |   |
+| :hourglass: | Game |   | Marsusss |   |
 | :x: | Player      |   |   |   |
 | :x: | HumanPlayer |   |   |   |
 | :x: | AiPlayer    |   |   |   |
