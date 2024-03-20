@@ -1,8 +1,8 @@
 import utils.check_utils as check_utils
-from modules.game_log import Game_log
+from modules.game_log import GameLog
 
 
-class Game_log_list:
+class GameLogList:
     def __init__(self, player_colors=None):
         if player_colors is None:
             self.player_colors = ["white", "black"]
@@ -31,7 +31,7 @@ class Game_log_list:
         return str(self)
 
     def update_list(self, game_log):
-        check_utils.check_is_instance("game_log", game_log, Game_log)
+        check_utils.check_is_instance("game_log", game_log, GameLog)
         check_utils.check_is_iterable_of_unique_elements_with_length(
             "game_log.player_id_to_color",
             game_log.player_id_to_color,

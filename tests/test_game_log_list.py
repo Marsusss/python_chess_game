@@ -1,14 +1,14 @@
 import unittest
 
 from modules.board import Board
-from modules.game_log import Game_log
-from modules.game_log_list import Game_log_list
+from modules.game_log import GameLog
+from modules.game_log_list import GameLogList
 
 
 class TestGameLogList(unittest.TestCase):
     def setUp(self):
-        self.log_list = Game_log_list(["white", "black"])
-        self.game_log = Game_log(1, {"p1": "white", "p2": "black"})
+        self.log_list = GameLogList(["white", "black"])
+        self.game_log = GameLog({"p1": "white", "p2": "black"}, 1)
         self.board_0 = Board(player_colors=["white", "black"])
         self.boards = [self.board_0]
         for board in self.boards:
@@ -26,7 +26,7 @@ class TestGameLogList(unittest.TestCase):
         self.assertEqual(self.log_list.log_list, [self.game_log])
 
         with self.assertRaises(ValueError):
-            Game_log_list([])  # less than two players
+            GameLogList([])  # less than two players
 
     def test_len(self):
         self.assertEqual(len(self.log_list), len(self.log_list.log_list))
@@ -44,7 +44,7 @@ class TestGameLogList(unittest.TestCase):
         self.assertEqual(repr(self.log_list), str(self.log_list))
 
     def test_update_list(self):
-        new_game_log = Game_log(2, {"p1": "black", "p2": "white"})
+        new_game_log = GameLog({"p1": "black", "p2": "white"}, 2)
         self.board_1 = Board(
             player_colors=list(new_game_log.player_id_to_color.values())
         )
