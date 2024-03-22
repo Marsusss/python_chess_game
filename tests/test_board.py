@@ -102,6 +102,18 @@ class TestBoard(unittest.TestCase):
     def test_get_piece_by_string(self):
         self.assertEqual(self.board.get_piece_by_string("a1"), self.board._board[0][0])
 
+    def test_is_colors_pieces(self):
+        is_whites = self.board.is_colors_pieces("white")
+        for i, row in enumerate(is_whites):
+            for j, column in enumerate(row):
+                if not column:
+                    if self.board[i, j] is not None:
+                        self.assertNotEqual(self.board[i, j]["color"], "white")
+                elif column:
+                    self.assertEqual(self.board[i, j]["color"], "white")
+                else:
+                    raise ValueError("Invalid value in is_whites")
+
     def test_move_piece(self):
         # Test not allowed move
         old_coordinate = (0, 4)
@@ -130,6 +142,22 @@ class TestBoard(unittest.TestCase):
         self.board.move_piece((2, 0), (3, 1))
         self.assertEqual(self.board[3, 1], pawn)
         self.assertEqual(self.board[2, 1], None)
+
+    def test_get_allowed_moves(self):
+        allowed_moves = self.board.get_allowed_moves("white")
+        for i, row in enumerate(self.board):
+            for j, piece in enumerate(row):
+                if piece is None or self.board[i, j]["color"] != "white":
+                    self.assertEqual(allowed_moves[i][j], [])
+
+                else:
+                    self.assertEqual(
+                        allowed_moves[i][j],
+                        self.board[i, j].get_allowed_moves(self.board),
+                    )
+
+        with self.assertRaises(ValueError):
+            self.board.get_allowed_moves("color not on board")
 
     def test_copy(self):
         copied_board = copy.copy(self.board)
@@ -166,6 +194,39 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(self.board.is_on_board((0, 0)))
         self.assertFalse(self.board.is_on_board((self.board.board_shape[0], 0)))
 
+    def test_is_on_board_and_occupied_by(self):
+        position = (1, 0)
+        color = "white"
+        self.assertTrue(self.board.is_on_board_and_occupied_by(position, [color]))
+
+        color = "black"
+        self.assertFalse(self.board.is_on_board_and_occupied_by(position, [color]))
+
+        colors = ["white", "black"]
+        self.assertTrue(self.board.is_on_board_and_occupied_by(position, colors))
+
+        position = (0, 0)
+        self.assertFalse(self.board.is_on_board_and_occupied_by(position, [color]))
+        self.assertFalse(self.board.is_on_board_and_occupied_by(position, colors))
+
+        position = (self.board.board_shape[0], 0)
+        self.assertEqual(
+            self.board.is_on_board_and_occupied_by(position, [color]),
+            self.board.is_on_board(position),
+        )
+
+        with self.assertRaises(TypeError):
+            self.board.is_on_board_and_occupied_by((1, 0), "not a list")
+
+        with self.assertRaises(TypeError):
+            self.board.is_on_board_and_occupied_by("not a coordinate", colors)
+
+        with self.assertRaises(ValueError):
+            self.board.is_on_board_and_occupied_by((1, 0))
+
+        with self.assertRaises(ValueError):
+            self.board.is_on_board_and_occupied_by((1, 0), [])
+
     def test_is_similar_to(self):
         self.assertTrue(self.board.is_similar_to(Board(self.player_colors)))
         self.assertFalse(self.board.is_similar_to(Board(["red", "green"])))
@@ -199,6 +260,7 @@ class TestBoard(unittest.TestCase):
     def test_getitem_invalid_coordinate(self):
         with self.assertRaises(IndexError):
             self.board[8, 8]  # out of bounds
+
         with self.assertRaises(TypeError):
             self.board["invalid"]  # invalid string coordinate
 

@@ -31,6 +31,26 @@ def get_next_list_element(input_list, current_element):
         return input_list[current_idx + 1]
 
 
+def get_nonzero_indices_of_2d_list(input_list):
+    """
+    This function returns the indices of the non-zero elements in a 2D list.
+
+    The function iterates over the rows and columns of the 2D list. If the element at
+    a given row and column is non-zero, the function appends the row and column indices
+    to the output list.
+
+    :param input_list: The input 2D list.
+    :return: A list of tuples, where each tuple contains the row and column indices of
+    a non-zero element in the input list.
+    """
+    return [
+        (i, j)
+        for i, row in enumerate(input_list)
+        for j, element in enumerate(row)
+        if element != 0
+    ]
+
+
 def slice_to_range(s, length):
     return range(*s.indices(length))
 
