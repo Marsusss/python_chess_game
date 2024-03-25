@@ -33,8 +33,8 @@ Table of classes and main with progress
 | ✅ | GameLogList  |   |   |   |
 | :x: | Rules       |   |   |   |
 | :hourglass: | Game |   | Marsusss | feat/add-Game-class |
-| :x: | Player      |   |   |   |
+| :hourglass: | Player |   | Marsusss | feat/Add-Player-parent-class |
 | :x: | HumanPlayer |   |   |   |
-| :x: | AiPlayer    |   |   |   |
+| :hourglass: | AiPlayer    |   | Marsusss |   |
 | :x: | Model       |   |   |   |
 | :x: | main        |   |   |   |
