@@ -260,8 +260,8 @@ class Board:
         check_utils.check_is_2d_coordinate(coordinate)
         if by_player_color is None and not_by_player_color is None:
             raise ValueError(
-                'At least one of by_player_color and not_by_player_color must be '
-                'provided'
+                "At least one of by_player_color and not_by_player_color must be "
+                "provided"
             )
 
         is_on_board_and_occupied = self.is_on_board(coordinate) and self.is_occupied(
@@ -273,8 +273,8 @@ class Board:
                 for color in not_by_player_color:
                     if color not in self.player_colors:
                         raise ValueError(
-                            f'Color must be in {self.player_colors}, got {color} '
-                            f'instead'
+                            f"Color must be in {self.player_colors}, got {color} "
+                            f"instead"
                         )
                 check_utils.check_is_iterable_of_length(
                     "not_by_player_color", not_by_player_color, list, min_length=1
@@ -289,8 +289,8 @@ class Board:
                 for color in by_player_color:
                     if color not in self.player_colors:
                         raise ValueError(
-                            f'Color must be in {self.player_colors}, got {color} '
-                            f'instead'
+                            f"Color must be in {self.player_colors}, got {color} "
+                            f"instead"
                         )
                 if not self[coordinate]["color"] in by_player_color:
                     return False
@@ -323,13 +323,10 @@ class Board:
         allowed_moves = [[[] for _ in range(8)] for _ in range(8)]
         for row in range(self.board_shape[0]):
             for column in range(self.board_shape[1]):
-                print(row, column)
-                print(self[row, column])
                 if (
                     self[row, column] is not None
                     and self[row, column]["color"] == color
                 ):
-                    print("Has color ", color)
                     allowed_moves[row][column] = self[row, column].get_allowed_moves(
                         self
                     )
