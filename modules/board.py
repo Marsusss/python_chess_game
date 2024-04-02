@@ -93,6 +93,11 @@ class Board:
                 if column is not None:
                     self.board_as_list[i][j] = self.get_piece_as_list(self[i, j])
 
+        self.king_positions = {
+            player_color: self.piece_dict[(player_color, "king")][0]
+            for player_color in self.player_colors
+        }
+
     def __copy__(self):
         new_copy = Board(player_colors=self.player_colors, board=self._board)
         return new_copy
@@ -180,7 +185,7 @@ class Board:
                     key = (piece["color"], piece["type"])
                     if key not in piece_dict:
                         piece_dict[key] = []
-                    piece_dict[key].append((i, j))
+                    piece_dict[key].append(self[i, j].position)
         return piece_dict
 
     def string_to_coordinate(self, coordinate_string):
@@ -315,23 +320,82 @@ class Board:
         self._board[old_coordinate[0]][old_coordinate[1]] = None
         self.update_board_as_list(new_coordinate, old_coordinate)
 
-    def get_allowed_moves(self, color):
+    def get_candidate_moves(self, color):
         if color not in self.player_colors:
             raise ValueError(
                 f"Color must be in {self.player_colors}, got {color} instead"
             )
-        allowed_moves = [[[] for _ in range(8)] for _ in range(8)]
+        candidate_moves = [
+            [[] for _ in range(self.board_shape[1])] for _ in range(self.board_shape[0])
+        ]
         for row in range(self.board_shape[0]):
             for column in range(self.board_shape[1]):
                 if (
                     self[row, column] is not None
                     and self[row, column]["color"] == color
                 ):
-                    allowed_moves[row][column] = self[row, column].get_allowed_moves(
+                    candidate_moves[row][column] = self[row, column].get_allowed_moves(
                         self
                     )
 
+        return candidate_moves
+
+    def get_allowed_moves(self, color, candidate_moves):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+
+        check_utils.check_is_iterable_of_length(
+            "candidate_moves", candidate_moves, list, self.board_shape[0]
+        )
+
+        allowed_moves = copy.deepcopy(candidate_moves)
+        for row in range(self.board_shape[0]):
+            for column in range(self.board_shape[1]):
+                for move in candidate_moves[row][column]:
+                    hypothetical_board = copy.deepcopy(self)
+                    hypothetical_board.move_piece((row, column), move)
+                    if hypothetical_board.is_check(color):
+                        allowed_moves[row][column].remove(move)
+
         return allowed_moves
+
+    def is_check(self, king_color):
+        if king_color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {king_color} instead"
+            )
+
+        king_coordinate = self.king_positions[king_color]
+        for opponent_color in self.player_colors:
+            if opponent_color != king_color:
+                found = any(
+                    king_coordinate in piece_moves
+                    for row in self.get_candidate_moves(opponent_color)
+                    for piece_moves in row
+                )
+                if found:
+                    return True
+
+        return False
+
+    def is_checkmate(self, king_color):
+        if king_color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {king_color} instead"
+            )
+        if not self.is_check(king_color):
+            return False
+
+        for row in self.get_allowed_moves(
+            king_color, self.get_candidate_moves(king_color)
+        ):
+            for piece_moves in row:
+                if len(piece_moves) > 0:
+                    return False
+
+        return True
 
     def en_passant_kill(self, target):
         self[target] = None

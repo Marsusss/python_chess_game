@@ -12,8 +12,10 @@ class AIPlayer(Player):
             raise ValueError(f"Model {model_name} is not supported.")
 
     def __str__(self):
-        return (f"Player_type: AIPlayer\nID: {self.id}\nColor: {self.color}\nModel: "
-                f"{self.model_name}")
+        return (
+            f"Player_type: AIPlayer\nID: {self.id}\nColor: {self.color}\nModel: "
+            f"{self.model_name}"
+        )
 
     def get_move(self, board):
         allowed_moves = self.get_allowed_moves(board)

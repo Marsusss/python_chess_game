@@ -27,7 +27,9 @@ class Player:
 
     def get_allowed_moves(self, board):
         check_utils.check_is_instance("board", board, Board)
-        allowed_moves = board.get_allowed_moves(self.color)
+        allowed_moves = board.get_allowed_moves(
+            self.color, board.get_candidate_moves(self.color)
+        )
         no_allowed_moves = True
         for row in range(board.board_shape[0]):
             for column in range(board.board_shape[1]):
@@ -39,13 +41,3 @@ class Player:
             raise ValueError(f"Player {self.id} has no allowed moves.")
 
         return allowed_moves
-
-        # coordinates_of_own_pieces = utils.get_nonzero_indices_of_2d_list(own_pieces)
-
-        # chosen_piece_coordinates =
-        # random.choice(utils.get_nonzero_indices_of_2d_list(own_pieces))
-        # allowed_moves_for_chosen_piece =
-        # allowed_moves[chosen_piece_coordinates[0]][chosen_piece_coordinates[1]]
-        # chosen_move_coordinates = random.choice(allowed_moves_for_chosen_piece)
-        #
-        # return chosen_piece_coordinates, chosen_move_coordinates

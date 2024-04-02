@@ -28,6 +28,8 @@ class TestBoard(unittest.TestCase):
             self.assertIsInstance(self.board._board[1][i], Pawn)
             self.assertIsInstance(self.board._board[6][i], Pawn)
 
+        self.assertEqual(self.board.king_positions, {"white": (0, 4), "black": (7, 4)})
+
     def test_board_as_string(self):
         board_string = self.board.board_as_string()
         # Check that the string starts with a newline
@@ -143,21 +145,94 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board[3, 1], pawn)
         self.assertEqual(self.board[2, 1], None)
 
-    def test_get_allowed_moves(self):
-        allowed_moves = self.board.get_allowed_moves("white")
+        # Test change king_position
+        self.board.move_piece((0, 4), (0, 3))
+        self.assertEqual(self.board.king_positions["white"], (0, 3))
+
+    def test_get_candidate_moves(self):
+        candidate_moves = self.board.get_candidate_moves("white")
         for i, row in enumerate(self.board):
             for j, piece in enumerate(row):
                 if piece is None or self.board[i, j]["color"] != "white":
-                    self.assertEqual(allowed_moves[i][j], [])
+                    self.assertEqual(candidate_moves[i][j], [])
 
                 else:
                     self.assertEqual(
-                        allowed_moves[i][j],
+                        candidate_moves[i][j],
                         self.board[i, j].get_allowed_moves(self.board),
                     )
 
         with self.assertRaises(ValueError):
-            self.board.get_allowed_moves("color not on board")
+            self.board.get_candidate_moves("color not on board")
+
+    def test_get_allowed_moves(self):
+        self.assertEqual(
+            self.board.get_allowed_moves(
+                "white", self.board.get_candidate_moves("white")
+            ),
+            self.board.get_candidate_moves("white"),
+        )
+
+        self.board[1, 3] = Pawn((1, 3), "black", 40, "up")
+        self.board[1, 3]["state"]["has_moved"] = True
+
+        self.assertEqual(
+            self.board.get_allowed_moves(
+                "white", self.board.get_candidate_moves("white")
+            ),
+            [
+                [[], [], [], [], [(0, 3), (0, 5), (1, 3)], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+                [[], [], [], [], [], [], [], []],
+            ],
+        )
+
+        with self.assertRaises(ValueError):
+            self.board.get_allowed_moves(
+                "color not on board", self.board.get_candidate_moves("white")
+            )
+
+    def test_is_check(self):
+        self.assertFalse(self.board.is_check("white"))
+        self.assertFalse(self.board.is_check("black"))
+
+        self.board[1, 3] = Pawn((1, 3), "black", 40, "up")
+        self.board[1, 3]["state"]["has_moved"] = True
+
+        self.assertTrue(self.board.is_check("white"))
+        self.assertFalse(self.board.is_check("black"))
+
+        with self.assertRaises(ValueError):
+            self.board.is_check("color not on board")
+
+    def test_is_checkmate(self):
+        self.assertFalse(self.board.is_checkmate("white"))
+        self.assertFalse(self.board.is_checkmate("black"))
+
+        self.board[1, 3] = Pawn((1, 3), "black", 40, "up")
+        self.board[1, 3]["state"]["has_moved"] = True
+
+        self.assertFalse(self.board.is_checkmate("white"))
+
+        for column_idx in range(self.board.board_shape[1]):
+            self.board[1, column_idx] = Pawn(
+                (1, column_idx), "black", 40 + column_idx, "up"
+            )
+            self.board[1, column_idx]["state"]["has_moved"] = True
+            self.board[2, column_idx] = Pawn(
+                (2, column_idx), "black", 50 + column_idx, "up"
+            )
+            self.board[2, column_idx].position = (2, column_idx)
+
+        self.assertTrue(self.board.is_checkmate("white"))
+
+        with self.assertRaises(ValueError):
+            self.board.is_checkmate("color not on board")
 
     def test_copy(self):
         copied_board = copy.copy(self.board)

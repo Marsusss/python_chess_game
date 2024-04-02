@@ -34,7 +34,9 @@ class TestPlayer(unittest.TestCase):
     def test_get_allowed_moves(self):
         self.assertEqual(
             self.player.get_allowed_moves(self.board),
-            self.board.get_allowed_moves("white"),
+            self.board.get_allowed_moves(
+                "white", self.board.get_candidate_moves("white")
+            ),
         )
 
         with self.assertRaises(ValueError):
