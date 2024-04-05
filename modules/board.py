@@ -361,6 +361,17 @@ class Board:
 
         return allowed_moves
 
+    def has_no_allowed_moves(self, color):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+        for row in self.get_allowed_moves(color, self.get_candidate_moves(color)):
+            for piece_moves in row:
+                if len(piece_moves) > 0:
+                    return False
+        return True
+
     def is_check(self, king_color):
         if king_color not in self.player_colors:
             raise ValueError(
@@ -381,21 +392,16 @@ class Board:
         return False
 
     def is_checkmate(self, king_color):
-        if king_color not in self.player_colors:
-            raise ValueError(
-                f"Color must be in {self.player_colors}, got {king_color} instead"
-            )
         if not self.is_check(king_color):
             return False
 
-        for row in self.get_allowed_moves(
-            king_color, self.get_candidate_moves(king_color)
-        ):
-            for piece_moves in row:
-                if len(piece_moves) > 0:
-                    return False
+        return self.has_no_allowed_moves(king_color)
 
-        return True
+    def has_no_allowed_moves_and_is_not_check(self, player_color):
+        if self.is_check(player_color):
+            return False
+
+        return self.has_no_allowed_moves(player_color)
 
     def en_passant_kill(self, target):
         self[target] = None

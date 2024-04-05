@@ -210,6 +210,25 @@ class TestBoard(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.board.is_check("color not on board")
 
+    def test_has_no_allowed(self):
+        self.assertFalse(self.board.has_no_allowed_moves("white"))
+        self.assertFalse(self.board.has_no_allowed_moves("black"))
+
+        for column_idx in range(self.board.board_shape[1]):
+            self.board[1, column_idx] = Pawn(
+                (1, column_idx), "black", 40 + column_idx, "up"
+            )
+            self.board[1, column_idx]["state"]["has_moved"] = True
+            self.board[2, column_idx] = Pawn(
+                (2, column_idx), "black", 50 + column_idx, "up"
+            )
+            self.board[2, column_idx].position = (2, column_idx)
+
+        self.assertTrue(self.board.has_no_allowed_moves("white"))
+
+        with self.assertRaises(ValueError):
+            self.board.has_no_allowed_moves("color not on board")
+
     def test_is_checkmate(self):
         self.assertFalse(self.board.is_checkmate("white"))
         self.assertFalse(self.board.is_checkmate("black"))
@@ -233,6 +252,28 @@ class TestBoard(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.board.is_checkmate("color not on board")
+
+    def test_has_no_moves_and_is_not_check(self):
+        self.assertFalse(self.board.has_no_allowed_moves_and_is_not_check("white"))
+        self.assertFalse(self.board.has_no_allowed_moves_and_is_not_check("black"))
+
+        for column_idx in range(self.board.board_shape[1]):
+            self.board[1, column_idx] = Pawn(
+                (1, column_idx), "black", 40 + column_idx, "up"
+            )
+            self.board[1, column_idx]["state"]["has_moved"] = True
+            self.board[2, column_idx] = Pawn(
+                (2, column_idx), "black", 50 + column_idx, "up"
+            )
+            self.board[2, column_idx].position = (2, column_idx)
+
+        self.assertFalse(self.board.has_no_allowed_moves_and_is_not_check("white"))
+
+        self.board[1, 3:6] = None
+        self.assertTrue(self.board.has_no_allowed_moves_and_is_not_check("white"))
+
+        with self.assertRaises(ValueError):
+            self.board.has_no_allowed_moves_and_is_not_check("color not on board")
 
     def test_copy(self):
         copied_board = copy.copy(self.board)

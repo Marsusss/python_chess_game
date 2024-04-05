@@ -6,17 +6,17 @@ from modules.player import Player
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
-        self.player = Player(1, "white")
+        self.player = Player("1", "white")
         self.board = Board(player_colors=["white", "black"])
 
     def test_init(self):
-        self.assertEqual(self.player.id, 1)
+        self.assertEqual(self.player.id, "1")
         self.assertEqual(self.player.color, "white")
-        with self.assertRaises(ValueError):
-            Player(-1, "white")
+        with self.assertRaises(TypeError):
+            Player(1, "white")
 
         with self.assertRaises(TypeError):
-            Player(1, 1)
+            Player("1", 1)
 
     def test_get_color(self):
         self.assertEqual(self.player.get_color(), self.player.color)

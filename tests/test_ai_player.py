@@ -6,21 +6,21 @@ from modules.board import Board
 
 class TestAIPlayer(unittest.TestCase):
     def setUp(self):
-        self.ai_player = AIPlayer(1, "white")
+        self.ai_player = AIPlayer("1", "white")
         self.board = Board(player_colors=["white", "black"])
 
     def test_init(self):
-        self.assertEqual(self.ai_player.id, 1)
+        self.assertEqual(self.ai_player.id, "1")
         self.assertEqual(self.ai_player.color, "white")
         self.assertEqual(self.ai_player.model_name, "random")
-        with self.assertRaises(ValueError):
-            AIPlayer(-1, "white")
+        with self.assertRaises(TypeError):
+            AIPlayer(1, "white")
 
         with self.assertRaises(TypeError):
-            AIPlayer(1, 1)
+            AIPlayer("1", 1)
 
         with self.assertRaises(ValueError):
-            AIPlayer(1, "white", "not a known model name")
+            AIPlayer("1", "white", "not a known model name")
 
         with self.assertRaises(NotImplementedError):
             self.ai_player.get_probabilities(self.board)

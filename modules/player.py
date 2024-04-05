@@ -4,7 +4,7 @@ from modules.board import Board
 
 class Player:
     def __init__(self, player_id, color):
-        check_utils.check_is_non_negative_int("id", player_id)
+        check_utils.check_is_instance("player_id", player_id, str)
         check_utils.check_is_instance("color", color, str)
         self.id = player_id
         self.color = color
