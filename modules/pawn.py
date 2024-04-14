@@ -42,6 +42,18 @@ class Pawn(ChessPiece):
 
         return deepcopy
 
+    def __hash__(self):
+        return hash(
+            (super().__hash__(), self.forward_direction, str(self.en_passant_cache))
+        )
+
+    def __eq__(self, other):
+        return (
+            super().__eq__(other)
+            and self.forward_direction == other.forward_direction
+            and self.en_passant_cache == other.en_passant_cache
+        )
+
     def get_allowed_moves(self, board):
         super().get_allowed_moves(board)
         allowed_moves = []

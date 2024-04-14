@@ -8,7 +8,7 @@ class ChessPiece:
         "rook": "♜",
         "bishop": "♝",
         "knight": "♞",
-        "pawn": "♟︎",
+        "pawn": "♟",
     }
     color_codes = {
         "r": "\033[31m",
@@ -66,9 +66,18 @@ class ChessPiece:
             "id": self.id,
         }
 
+    def __hash__(self):
+        return hash((self.position, self.piece_type, self.color, str(self.state)))
+
     def __eq__(self, other):
         if type(self) is type(other):
-            return self.dict == other.dict
+            return (
+                self.position == other.position
+                and self.piece_type == other.piece_type
+                and self.color == other.color
+                and self.state == other.state
+            )
+
         return False
 
     def __ne__(self, other):

@@ -30,6 +30,38 @@ class TestBoard(unittest.TestCase):
 
         self.assertEqual(self.board.king_positions, {"white": (0, 4), "black": (7, 4)})
 
+    def test_eq(self):
+        other_board = Board(player_colors=self.player_colors)
+        self.assertEqual(self.board, other_board)
+
+        other_board[0, 0] = Pawn((0, 0), "white", 8, "down")
+        self.assertNotEqual(self.board, other_board)
+
+        other_board[0, 0] = None
+        self.assertEqual(self.board, other_board)
+
+        other_board[1, 0] = Pawn((1, 0), "white", 20, "up")
+        self.assertNotEqual(self.board, other_board)
+
+        other_board.player_colors = ["black", "white"]
+        self.assertNotEqual(self.board, other_board)
+
+    def test_neq(self):
+        other_board = Board(player_colors=self.player_colors)
+        self.assertNotEqual(self.board == other_board, self.board != other_board)
+
+        other_board[0, 0] = Pawn((0, 0), "white", 8, "down")
+        self.assertNotEqual(self.board == other_board, self.board != other_board)
+
+        other_board[0, 0] = None
+        self.assertNotEqual(self.board == other_board, self.board != other_board)
+
+        other_board[1, 0] = Pawn((1, 0), "white", 20, "up")
+        self.assertNotEqual(self.board == other_board, self.board != other_board)
+
+        other_board.player_colors = ["black", "white"]
+        self.assertNotEqual(self.board == other_board, self.board != other_board)
+
     def test_board_as_string(self):
         board_string = self.board.board_as_string()
         # Check that the string starts with a newline
@@ -135,12 +167,12 @@ class TestBoard(unittest.TestCase):
         self.board.move_piece(old_coordinate, new_coordinate)
         self.assertEqual(self.board[new_coordinate], pawn)
         self.assertEqual(self.board[old_coordinate], None)
+        self.assertEqual(self.board.board_cache, {})
 
         # Test en passant
         self.board._board[2][1] = Pawn((2, 1), "black", 40, "up")
         self.board._board[2][1]["state"]["is_en_passant_able"] = True
 
-        self.board.en_passant_cache = (2, 1)
         self.board.move_piece((2, 0), (3, 1))
         self.assertEqual(self.board[3, 1], pawn)
         self.assertEqual(self.board[2, 1], None)
@@ -148,6 +180,76 @@ class TestBoard(unittest.TestCase):
         # Test change king_position
         self.board.move_piece((0, 4), (0, 3))
         self.assertEqual(self.board.king_positions["white"], (0, 3))
+        self.assertEqual(self.board.board_cache, {})
+
+        # Test building board cache on reversible move
+        self.board.move_piece((0, 3), (0, 4))
+        self.assertEqual(
+            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 1}
+        )
+
+        # Test clearing board_cache on kill
+        self.board[0, 3] = Pawn((0, 3), "black", 41, "up")
+        self.board.move_piece((0, 4), (0, 3))
+        self.assertEqual(self.board.board_cache, {})
+
+    def test_update_board_cache(self):
+        self.board.update_board_cache(
+            self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
+        )
+        self.assertEqual(
+            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 1}
+        )
+
+        self.board.update_board_cache(
+            self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
+        )
+        self.assertEqual(
+            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 2}
+        )
+        self.assertEqual(self.board.threefold_repetition, False)
+
+        self.board.update_board_cache(
+            self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
+        )
+        self.assertEqual(
+            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 3}
+        )
+        self.assertEqual(self.board.threefold_repetition, True)
+
+        old_board = copy.deepcopy(self.board)
+        self.board[1, 0] = None
+        self.board.update_board_cache(
+            self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
+        )
+        self.assertEqual(len(self.board.board_cache), 2)
+        self.assertEqual(
+            self.board.board_cache[tuple(tuple(row) for row in old_board._board)], 3
+        )
+        self.assertEqual(
+            self.board.board_cache[tuple(tuple(row) for row in self.board._board)], 1
+        )
+        self.assertEqual(self.board.threefold_repetition, True)
+
+        self.board.update_board_cache(
+            self.board[1, 1], copy.deepcopy(self.board[1, 1]), self.board, False
+        )
+        self.assertEqual(self.board.board_cache, {})
+
+        with self.assertRaises(TypeError):
+            self.board.update_board_cache(
+                self.board[0, 4], copy.deepcopy(self.board[0, 4]), "not a board", False
+            )
+
+        with self.assertRaises(TypeError):
+            self.board.update_board_cache(
+                "not a chess piece", copy.deepcopy(self.board[0, 4]), self.board, False
+            )
+
+        with self.assertRaises(TypeError):
+            self.board.update_board_cache(
+                self.board[0, 4], "not a chess piece", self.board, False
+            )
 
     def test_get_candidate_moves(self):
         candidate_moves = self.board.get_candidate_moves("white")

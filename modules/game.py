@@ -1,8 +1,9 @@
 import utils.check_utils as check_utils
-# from modules.human_player import HumanPlayer
 from modules.ai_player import AIPlayer
 from modules.board import Board
 from modules.game_log import GameLog
+
+# from modules.human_player import HumanPlayer
 
 
 class Game:
@@ -157,6 +158,9 @@ class Game:
 
     def check_game_state(self, current_player_id):
         check_utils.check_is_instance("current_player_id", current_player_id, str)
+
+        if self.board.threefold_repetition:
+            return {"state": "remis", "winner": None}
 
         for player_id in self.player_ids:
             if player_id != current_player_id:

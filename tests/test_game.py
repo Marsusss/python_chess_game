@@ -150,10 +150,17 @@ class TestGame(unittest.TestCase):
             {"state": "turn_limit", "winner": None},
         )
 
+        self.game.board.threefold_repetition = True
+        self.assertEqual(
+            self.game.check_game_state(current_player_id="p2"),
+            {"state": "remis", "winner": None},
+        )
+
         with self.assertRaises(TypeError):
             self.game.check_game_state(current_player_id=1)
 
         self.game.turn_count = 101
+        self.game.board.threefold_repetition = False
         with self.assertRaises(ValueError):
             self.game.check_game_state(current_player_id="p1")
 
@@ -192,6 +199,8 @@ class TestGame(unittest.TestCase):
         )
         while self.game.state["state"] == "in_progress":
             self.game.take_turn()
+            print(self.game)
+            print(self.game.board.board_cache)
 
     def test_play_game(self):
         self.game.play_game()
