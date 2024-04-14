@@ -37,6 +37,7 @@ class King(ChessPiece):
 
         return allowed_moves
 
-    def move(self, new_position, board):  # NOT TESTABLE
+    def move(self, new_position, board):
         super().move(new_position, board)
         self.state["has_moved"] = True
+        board.king_positions[self.color] = new_position

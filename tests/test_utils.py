@@ -19,6 +19,14 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ValueError):
             utils.get_next_list_element(input_list, "a")
 
+    def test_get_nonzero_indices_of_2d_list(self):
+        input_list = [[0, 0, 0], [0, 1, 0], [1, 0, 0]]
+        self.assertEqual(
+            utils.get_nonzero_indices_of_2d_list(input_list), [(1, 1), (2, 0)]
+        )
+        input_list = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        self.assertEqual(utils.get_nonzero_indices_of_2d_list(input_list), [])
+
     def test_slice_to_range(self):
         # Test with positive start, stop, and step
         s = slice(1, 5, 2)

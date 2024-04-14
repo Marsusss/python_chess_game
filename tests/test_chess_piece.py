@@ -31,6 +31,32 @@ class TestChessPiece(unittest.TestCase):
         with self.assertRaises(ValueError):
             ChessPiece((0, 0), "king", "black", -1)
 
+    def test_eq(self):
+        other_chess_piece = ChessPiece((0, 0), "king", "black", 1)
+        self.assertEqual(self.chess_piece, other_chess_piece)
+
+        other_chess_piece.id = 2
+        self.assertEqual(self.chess_piece, other_chess_piece)
+
+        other_chess_piece.color = "white"
+        self.assertNotEqual(self.chess_piece, other_chess_piece)
+
+    def test_neq(self):
+        other_chess_piece = ChessPiece((0, 0), "king", "black", 1)
+        self.assertNotEqual(
+            self.chess_piece == other_chess_piece, self.chess_piece != other_chess_piece
+        )
+
+        other_chess_piece.id = 2
+        self.assertNotEqual(
+            self.chess_piece == other_chess_piece, self.chess_piece != other_chess_piece
+        )
+
+        other_chess_piece.color = "white"
+        self.assertNotEqual(
+            self.chess_piece == other_chess_piece, self.chess_piece != other_chess_piece
+        )
+
     def test_deepcopy(self):
         deepcopy_piece = copy.deepcopy(self.chess_piece)
         self.assertIsNot(deepcopy_piece, self.chess_piece)

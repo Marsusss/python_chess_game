@@ -2,12 +2,12 @@ import copy
 import unittest
 
 from modules.board import Board
-from modules.game_log import Game_log
+from modules.game_log import GameLog
 
 
 class TestGameLog(unittest.TestCase):
     def setUp(self):
-        self.log = Game_log(1, {"p1": "white", "p2": "black"})
+        self.log = GameLog({"p1": "white", "p2": "black"}, 1)
         self.board_0 = Board(player_colors=["white", "black"])
         self.boards = [self.board_0]
         for board in self.boards:
@@ -61,13 +61,13 @@ class TestGameLog(unittest.TestCase):
 
     def test_init_errors(self):
         with self.assertRaises(TypeError):
-            Game_log("1", {"p1": "white", "p2": "black"})
+            GameLog({"p1": "white", "p2": "black"}, "1")
         with self.assertRaises(ValueError):
-            Game_log(-1, {"p1": "white", "p2": "black"})
+            GameLog({"p1": "white", "p2": "black"}, -1)
         with self.assertRaises(TypeError):
-            Game_log(1, ["white", "black"])
+            GameLog(["white", "black"], 1)
         with self.assertRaises(ValueError):
-            Game_log(1, {"p1": "white"})
+            GameLog({"p1": "white"}, 1)
 
     def test_update_log_errors(self):
         with self.assertRaises(TypeError):
