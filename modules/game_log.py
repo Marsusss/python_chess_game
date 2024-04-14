@@ -2,11 +2,8 @@ import utils.check_utils as check_utils
 from modules.board import Board
 
 
-class Game_log:
-    def __init__(self, game_number=0, player_id_to_color=None):
-        if player_id_to_color is None:
-            player_id_to_color = {"p1": "white", "p2": "black"}
-
+class GameLog:
+    def __init__(self, player_id_to_color, game_number=0):
         check_utils.check_is_non_negative_int("game_number", game_number)
         check_utils.check_is_iterable_of_length(
             "player_id_to_color", player_id_to_color, dict, min_length=2
@@ -26,10 +23,13 @@ class Game_log:
         return iter(self.boards)
 
     def __str__(self):
-        return (
-            f"There are {len(self)} boards saved and the first element is:"
-            f" {self.boards[0]}"
-        )
+        if len(self) == 0:
+            return "The game log is empty."
+        else:
+            return (
+                f"There are {len(self)} boards saved and the first element is:"
+                f" {self.boards[0]}"
+            )
 
     def __repr__(self):
         return str(self)

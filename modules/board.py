@@ -93,6 +93,23 @@ class Board:
                 if column is not None:
                     self.board_as_list[i][j] = self.get_piece_as_list(self[i, j])
 
+        self.king_positions = {
+            player_color: self.piece_dict[(player_color, "king")][0]
+            for player_color in self.player_colors
+        }
+
+        self.board_cache = {}
+        self.threefold_repetition = False
+
+    def __eq__(self, other):
+        if not self.is_similar_to(other):
+            return False
+
+        return self.get_board() == other.get_board()
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __copy__(self):
         new_copy = Board(player_colors=self.player_colors, board=self._board)
         return new_copy
@@ -180,7 +197,7 @@ class Board:
                     key = (piece["color"], piece["type"])
                     if key not in piece_dict:
                         piece_dict[key] = []
-                    piece_dict[key].append((i, j))
+                    piece_dict[key].append(self[i, j].position)
         return piece_dict
 
     def string_to_coordinate(self, coordinate_string):
@@ -231,6 +248,22 @@ class Board:
         coordinate = self.string_to_coordinate(coordinate_string)
         return self.get_piece(coordinate)
 
+    def is_colors_pieces(self, color):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+        is_colors_pieces = [[False for _ in range(8)] for _ in range(8)]
+        for row in range(self.board_shape[0]):
+            for column in range(self.board_shape[1]):
+                if (
+                    self[row, column] is not None
+                    and self[row, column]["color"] == color
+                ):
+                    is_colors_pieces[row][column] = True
+
+        return is_colors_pieces
+
     def is_occupied(self, coordinate):
         check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
         return isinstance(self[coordinate], ChessPiece)
@@ -241,21 +274,41 @@ class Board:
     def is_on_board_and_occupied_by(
         self, coordinate, by_player_color=None, not_by_player_color=None
     ):
-        check_utils.check_is_2d_coordinate(coordinate, self.board_shape)
+        check_utils.check_is_2d_coordinate(coordinate)
+        if by_player_color is None and not_by_player_color is None:
+            raise ValueError(
+                "At least one of by_player_color and not_by_player_color must be "
+                "provided"
+            )
 
         is_on_board_and_occupied = self.is_on_board(coordinate) and self.is_occupied(
             coordinate
         )
+
         if is_on_board_and_occupied:
             if not_by_player_color is not None:
-                check_utils.check_is_instance(
-                    "not_by_player_color", not_by_player_color, list
+                for color in not_by_player_color:
+                    if color not in self.player_colors:
+                        raise ValueError(
+                            f"Color must be in {self.player_colors}, got {color} "
+                            f"instead"
+                        )
+                check_utils.check_is_iterable_of_length(
+                    "not_by_player_color", not_by_player_color, list, min_length=1
                 )
                 if self[coordinate]["color"] in not_by_player_color:
                     return False
 
             if by_player_color is not None:
-                check_utils.check_is_instance("by_player_color", by_player_color, list)
+                check_utils.check_is_iterable_of_length(
+                    "by_player_color", by_player_color, list, min_length=1
+                )
+                for color in by_player_color:
+                    if color not in self.player_colors:
+                        raise ValueError(
+                            f"Color must be in {self.player_colors}, got {color} "
+                            f"instead"
+                        )
                 if not self[coordinate]["color"] in by_player_color:
                     return False
 
@@ -273,11 +326,123 @@ class Board:
                 f" occupied, got {self[old_coordinate]}"
             )
 
+        piece_killed = self.is_occupied(new_coordinate)
+
+        piece_clone = copy.deepcopy(self[old_coordinate])
+
         self[old_coordinate].move(new_coordinate, self)
 
         self._board[new_coordinate[0]][new_coordinate[1]] = self[old_coordinate]
         self._board[old_coordinate[0]][old_coordinate[1]] = None
+
+        self.update_board_cache(self[new_coordinate], piece_clone, self, piece_killed)
         self.update_board_as_list(new_coordinate, old_coordinate)
+
+    def update_board_cache(self, moved_piece, old_piece_clone, board, piece_killed):
+        check_utils.check_is_instance("Moved_piece", moved_piece, ChessPiece)
+        check_utils.check_is_instance("Old_piece_clone", old_piece_clone, ChessPiece)
+        check_utils.check_is_instance("Board", board, Board)
+
+        if (
+            piece_killed
+            or isinstance(moved_piece, Pawn)
+            or old_piece_clone["state"] != moved_piece["state"]
+        ):
+            self.board_cache = {}
+
+        else:
+            immutable_board = tuple(tuple(row) for row in board.get_board())
+            if immutable_board in self.board_cache.keys():
+                self.board_cache[immutable_board] += 1
+
+                if self.board_cache[immutable_board] == 3:
+                    self.threefold_repetition = True
+
+            else:
+                self.board_cache[immutable_board] = 1
+
+    def get_candidate_moves(self, color):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+        candidate_moves = [
+            [[] for _ in range(self.board_shape[1])] for _ in range(self.board_shape[0])
+        ]
+        for row in range(self.board_shape[0]):
+            for column in range(self.board_shape[1]):
+                if (
+                    self[row, column] is not None
+                    and self[row, column]["color"] == color
+                ):
+                    candidate_moves[row][column] = self[row, column].get_allowed_moves(
+                        self
+                    )
+
+        return candidate_moves
+
+    def get_allowed_moves(self, color, candidate_moves):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+
+        check_utils.check_is_iterable_of_length(
+            "candidate_moves", candidate_moves, list, self.board_shape[0]
+        )
+
+        allowed_moves = copy.deepcopy(candidate_moves)
+        for row in range(self.board_shape[0]):
+            for column in range(self.board_shape[1]):
+                for move in candidate_moves[row][column]:
+                    hypothetical_board = copy.deepcopy(self)
+                    hypothetical_board.move_piece((row, column), move)
+                    if hypothetical_board.is_check(color):
+                        allowed_moves[row][column].remove(move)
+
+        return allowed_moves
+
+    def has_no_allowed_moves(self, color):
+        if color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {color} instead"
+            )
+        for row in self.get_allowed_moves(color, self.get_candidate_moves(color)):
+            for piece_moves in row:
+                if len(piece_moves) > 0:
+                    return False
+        return True
+
+    def is_check(self, king_color):
+        if king_color not in self.player_colors:
+            raise ValueError(
+                f"Color must be in {self.player_colors}, got {king_color} instead"
+            )
+
+        king_coordinate = self.king_positions[king_color]
+        for opponent_color in self.player_colors:
+            if opponent_color != king_color:
+                found = any(
+                    king_coordinate in piece_moves
+                    for row in self.get_candidate_moves(opponent_color)
+                    for piece_moves in row
+                )
+                if found:
+                    return True
+
+        return False
+
+    def is_checkmate(self, king_color):
+        if not self.is_check(king_color):
+            return False
+
+        return self.has_no_allowed_moves(king_color)
+
+    def has_no_allowed_moves_and_is_not_check(self, player_color):
+        if self.is_check(player_color):
+            return False
+
+        return self.has_no_allowed_moves(player_color)
 
     def en_passant_kill(self, target):
         self[target] = None

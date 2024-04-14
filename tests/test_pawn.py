@@ -18,6 +18,42 @@ class TestPawn(unittest.TestCase):
         self.assertEqual(self.pawn.state["is_en_passant_able"], False)
         self.assertEqual(self.pawn.forward_direction, (1, 0))
 
+    def test_eq(self):
+        other_pawn = Pawn((1, 0), "black", 8, "down")
+        self.assertEqual(self.pawn, other_pawn)
+
+        other_pawn.id = 9
+        self.assertEqual(self.pawn, other_pawn)
+
+        other_pawn.color = "white"
+        self.assertNotEqual(self.pawn, other_pawn)
+
+        other_pawn.forward_direction = (-1, 0)
+        other_pawn.color = "black"
+        self.assertNotEqual(self.pawn, other_pawn)
+
+        other_pawn.en_passant_cache = {(1, 1): (2, 1)}
+        other_pawn.forward_direction = (1, 0)
+        self.assertNotEqual(self.pawn, other_pawn)
+
+    def test_neq(self):
+        other_pawn = Pawn((1, 0), "black", 8, "down")
+        self.assertNotEqual(self.pawn == other_pawn, self.pawn != other_pawn)
+
+        other_pawn.id = 9
+        self.assertNotEqual(self.pawn == other_pawn, self.pawn != other_pawn)
+
+        other_pawn.color = "white"
+        self.assertNotEqual(self.pawn == other_pawn, self.pawn != other_pawn)
+
+        other_pawn.forward_direction = (-1, 0)
+        other_pawn.color = "black"
+        self.assertNotEqual(self.pawn == other_pawn, self.pawn != other_pawn)
+
+        other_pawn.en_passant_cache = {(1, 1): (2, 1)}
+        other_pawn.forward_direction = (1, 0)
+        self.assertNotEqual(self.pawn == other_pawn, self.pawn != other_pawn)
+
     def test_deepcopy(self):
         deepcopy_piece = copy.deepcopy(self.pawn)
         self.assertIsNot(deepcopy_piece, self.pawn)
