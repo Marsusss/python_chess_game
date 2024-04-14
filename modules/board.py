@@ -5,6 +5,7 @@ import utils.utils as utils
 from modules.chess_piece import ChessPiece
 from modules.king import King
 from modules.pawn import Pawn
+from modules.bishop import Bishop
 
 
 class Board:
@@ -17,21 +18,30 @@ class Board:
         if board is None:
             self._board = [[None for _ in range(8)] for _ in range(8)]
             self.board_shape = (len(self._board), len(self._board[0]))
+            
             self._board[0][4] = King((0, 4), player_colors[0], 4)
             self._board[7][4] = King((7, 4), player_colors[1], 3 * 8 + 4)
-            self._board[1] = [
-                Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)
-            ]
-            self._board[6] = [
-                Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
-            ]
+            
+            self._board[1] = [Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)]
+            self._board[6] = [Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)]
+            
+            self._board[0][2] = Bishop((0, 2), player_colors[0], 2)
+            self._board[0][5] = Bishop((0, 5), player_colors[0], 5)
+            self._board[7][2] = Bishop((7, 2), player_colors[1], 3 * 8 + 2)
+            self._board[7][5] = Bishop((7, 5), player_colors[1], 3 * 8 + 5)
+            
             self._board = [[None for _ in range(8)] for _ in range(8)]
+            
             self[0, 4] = King((0, 4), player_colors[0], 4)
             self[7, 4] = King((7, 4), player_colors[1], 3 * 8 + 4)
+            
             self[1] = [Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)]
-            self[6] = [
-                Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
-            ]
+            self[6] = [Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)]
+            
+            self[0, 2] = Bishop((0, 2), player_colors[0], 2)
+            self[0, 5] = Bishop((0, 5), player_colors[0], 5)
+            self[7, 2] = Bishop((7, 2), player_colors[1], 3 * 8 + 2)
+            self[7, 5] = Bishop((7, 5), player_colors[1], 3 * 8 + 5)
         else:
             self._board = board
             self.board_shape = (len(self._board), len(self._board[0]))
