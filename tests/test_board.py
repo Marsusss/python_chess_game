@@ -170,8 +170,8 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.board_cache, {})
 
         # Test en passant
-        self.board._board[2][1] = Pawn((2, 1), "black", 40, "up")
-        self.board._board[2][1]["state"]["is_en_passant_able"] = True
+        self.board[2, 1] = Pawn((2, 1), "black", 40, "up")
+        self.board[2, 1]["state"]["is_en_passant_able"] = True
 
         self.board.move_piece((2, 0), (3, 1))
         self.assertEqual(self.board[3, 1], pawn)
@@ -185,7 +185,8 @@ class TestBoard(unittest.TestCase):
         # Test building board cache on reversible move
         self.board.move_piece((0, 3), (0, 4))
         self.assertEqual(
-            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 1}
+            self.board.board_cache,
+            {(tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 1},
         )
 
         # Test clearing board_cache on kill
@@ -198,14 +199,16 @@ class TestBoard(unittest.TestCase):
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
         self.assertEqual(
-            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 1}
+            self.board.board_cache,
+            {(tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 1},
         )
 
         self.board.update_board_cache(
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
         self.assertEqual(
-            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 2}
+            self.board.board_cache,
+            {(tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 2},
         )
         self.assertEqual(self.board.threefold_repetition, False)
 
@@ -213,7 +216,8 @@ class TestBoard(unittest.TestCase):
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
         self.assertEqual(
-            self.board.board_cache, {tuple(tuple(row) for row in self.board._board): 3}
+            self.board.board_cache,
+            {(tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 3},
         )
         self.assertEqual(self.board.threefold_repetition, True)
 
@@ -224,10 +228,16 @@ class TestBoard(unittest.TestCase):
         )
         self.assertEqual(len(self.board.board_cache), 2)
         self.assertEqual(
-            self.board.board_cache[tuple(tuple(row) for row in old_board._board)], 3
+            self.board.board_cache[
+                (tuple(tuple(row) for row in old_board), self.board[0, 4]["color"])
+            ],
+            3,
         )
         self.assertEqual(
-            self.board.board_cache[tuple(tuple(row) for row in self.board._board)], 1
+            self.board.board_cache[
+                (tuple(tuple(row) for row in self.board), self.board[0, 4]["color"])
+            ],
+            1,
         )
         self.assertEqual(self.board.threefold_repetition, True)
 
@@ -235,6 +245,21 @@ class TestBoard(unittest.TestCase):
             self.board[1, 1], copy.deepcopy(self.board[1, 1]), self.board, False
         )
         self.assertEqual(self.board.board_cache, {})
+
+        self.board.update_board_cache(
+            self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
+        )
+        self.board.update_board_cache(
+            self.board[7, 4], copy.deepcopy(self.board[7, 4]), self.board, False
+        )
+
+        self.assertEqual(
+            self.board.board_cache,
+            {
+                (tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 1,
+                (tuple(tuple(row) for row in self.board), self.board[7, 4]["color"]): 1,
+            },
+        )
 
         with self.assertRaises(TypeError):
             self.board.update_board_cache(
