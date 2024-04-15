@@ -351,7 +351,10 @@ class Board:
             self.board_cache = {}
 
         else:
-            immutable_board = tuple(tuple(row) for row in board.get_board())
+            immutable_board = (
+                tuple(tuple(row) for row in board.get_board()),
+                moved_piece["color"],
+            )
             if immutable_board in self.board_cache.keys():
                 self.board_cache[immutable_board] += 1
 
