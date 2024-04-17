@@ -199,8 +199,6 @@ class TestGame(unittest.TestCase):
         )
         while self.game.state["state"] == "in_progress":
             self.game.take_turn()
-            print(self.game)
-            print(self.game.board.board_cache)
 
     def test_play_game(self):
         self.game.play_game()
