@@ -23,7 +23,7 @@ Table of classes and main with progress
 | ✅ | ChessPiece   |   |   |   |
 | ✅ | King         |   |   |   |
 | ✅ | Pawn         |   |   |   |
-| :x: | Bishop      |   | thelodberg |   |
+| ⌛ | Bishop      |   | thelodberg | [Bishop](https://github.com/Marsusss/python_chess_ai/tree/Bishop_Implementation) |
 | :x: | Knight      |   |   |   |
 | :x: | Rook        |   |   |   |
 | :x: | Queen       |   |   |   |
@@ -31,10 +31,10 @@ Table of classes and main with progress
 | ✅ | Score        |   |   |   |
 | ✅ | GameLog      |   |   |   |
 | ✅ | GameLogList  |   |   |   |
-| :hourglass: | Game |   | Marsusss | feat/Add-Player-parent-class |
+| ✅ | Game |   |   |   |
 | :x: | Games |   |   |   |
-| :hourglass: | Player |   | Marsusss | feat/Add-Player-parent-class |
+| ✅ | Player |   |   |   |
 | :x: | HumanPlayer |   |   |   |
-| :hourglass: | AiPlayer    |   | Marsusss | feat/Add-Player-parent-class |
+| ✅ | AiPlayer    |   |   |   |
 | :x: | Model       |   |   |   |
 | :x: | main        |   |   |   |
