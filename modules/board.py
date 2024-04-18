@@ -65,7 +65,7 @@ class Board:
                     "King_list", self.piece_dict[(player_color, "king")], list, 1
                 )
             except KeyError:
-                raise ValueError(f"{player_color} player doesn't have a king")
+                raise ValueError(f"{player_color} player doesn't have a king\n board:\n {self}")
 
         alphabet = [
             "a",
@@ -409,6 +409,9 @@ class Board:
                     hypothetical_board.move_piece((row, column), move)
                     if hypothetical_board.is_check(color):
                         allowed_moves[row][column].remove(move)
+
+        print("allowed moves are:\n", allowed_moves)
+        print("candidate moves are:\n", candidate_moves)
 
         return allowed_moves
 

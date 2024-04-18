@@ -135,9 +135,9 @@ class TestGame(unittest.TestCase):
             {"state": "checkmate", "winner": "p2"},
         )
 
-        for column_idx in range(3, 6):
-            self.game.board[1, column_idx] = None
-
+        self.game.board[1, 3:6] = None
+        self.game.board[0, :4] = None
+        self.game.board[0, 5:] = None
         self.assertEqual(
             self.game.check_game_state(current_player_id="p2"),
             {"state": "remis", "winner": None},
