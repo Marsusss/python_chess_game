@@ -16,16 +16,7 @@ class Board:
 
         if board is None:
             self._board = [[None for _ in range(8)] for _ in range(8)]
-            self.board_shape = (len(self._board), len(self._board[0]))
-            self._board[0][4] = King((0, 4), player_colors[0], 4)
-            self._board[7][4] = King((7, 4), player_colors[1], 3 * 8 + 4)
-            self._board[1] = [
-                Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)
-            ]
-            self._board[6] = [
-                Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
-            ]
-            self._board = [[None for _ in range(8)] for _ in range(8)]
+            self.board_shape = (len(self), len(self[0]))
             self[0, 4] = King((0, 4), player_colors[0], 4)
             self[7, 4] = King((7, 4), player_colors[1], 3 * 8 + 4)
             self[1] = [Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)]
@@ -34,16 +25,16 @@ class Board:
             ]
         else:
             self._board = board
-            self.board_shape = (len(self._board), len(self._board[0]))
+            self.board_shape = (len(self), len(self[0]))
 
         check_utils.check_is_iterable_of_length(
             "board", self._board, list, min_length=3, max_length=20
         )
         check_utils.check_is_iterable_of_length(
-            "row_0", self._board[0], list, min_length=3, max_length=20
+            "row_0", self[0], list, min_length=3, max_length=20
         )
 
-        for i, row in enumerate(self._board[1:]):
+        for i, row in enumerate(self[1:]):
             check_utils.check_is_iterable_of_length(
                 f"row_{i}", row, list, self.board_shape[1]
             )
@@ -125,9 +116,18 @@ class Board:
         return len(self._board)
 
     def __getitem__(self, coordinates):
-        check_utils.check_is_instance_of_types("coordinates", coordinates, (tuple, str))
+        check_utils.check_is_instance_of_types(
+            "coordinates", coordinates, (tuple, int, str, slice)
+        )
         if isinstance(coordinates, str):
             return self.get_piece_by_string(coordinates)
+
+        if isinstance(coordinates, int):
+            check_utils.check_is_non_negative_int("row_coordinate", coordinates)
+            return self._board[coordinates]
+
+        if isinstance(coordinates, slice):
+            return self._board[coordinates]
 
         for coordinate in coordinates:
             check_utils.check_is_instance_of_types(
@@ -191,7 +191,7 @@ class Board:
 
     def construct_piece_dict(self):
         piece_dict = {}
-        for i, row in enumerate(self._board):
+        for i, row in enumerate(self):
             for j, piece in enumerate(row):
                 if piece is not None:
                     key = (piece["color"], piece["type"])
@@ -224,7 +224,7 @@ class Board:
 
     def board_as_string(self):
         board_string = "\n"  # Start with a newline
-        for row in self._board:
+        for row in self:
             for piece in row:
                 if piece is None:
                     board_string += "O "  # Add an 'O' and a space for empty squares
@@ -253,7 +253,10 @@ class Board:
             raise ValueError(
                 f"Color must be in {self.player_colors}, got {color} instead"
             )
-        is_colors_pieces = [[False for _ in range(8)] for _ in range(8)]
+        is_colors_pieces = [
+            [False for _ in range(self.board_shape[1])]
+            for _ in range(self.board_shape[0])
+        ]
         for row in range(self.board_shape[0]):
             for column in range(self.board_shape[1]):
                 if (

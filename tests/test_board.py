@@ -17,16 +17,16 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.player_colors, self.player_colors)
 
         # Test board dimensions
-        self.assertEqual(len(self.board._board), 8)
-        for row in self.board._board:
+        self.assertEqual(len(self.board), 8)
+        for row in self.board:
             self.assertEqual(len(row), 8)
 
         # Test pieces
-        self.assertIsInstance(self.board._board[0][4], King)
-        self.assertIsInstance(self.board._board[7][4], King)
+        self.assertIsInstance(self.board[0, 4], King)
+        self.assertIsInstance(self.board[7, 4], King)
         for i in range(8):
-            self.assertIsInstance(self.board._board[1][i], Pawn)
-            self.assertIsInstance(self.board._board[6][i], Pawn)
+            self.assertIsInstance(self.board[1, i], Pawn)
+            self.assertIsInstance(self.board[6, i], Pawn)
 
         self.assertEqual(self.board.king_positions, {"white": (0, 4), "black": (7, 4)})
 
@@ -99,6 +99,8 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board[:, :], self.board._board[:][:])
         self.assertEqual(self.board["a1"], self.board._board[0][0])
         self.assertEqual(self.board[0, 0], self.board._board[0][0])
+        self.assertEqual(self.board[0], self.board._board[0])
+        self.assertEqual(self.board[2:7], self.board._board[2:7])
 
     def test_setitem(self):
         # Test setting a single item
@@ -134,7 +136,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.get_piece((0, 0)), self.board[0, 0])
 
     def test_get_piece_by_string(self):
-        self.assertEqual(self.board.get_piece_by_string("a1"), self.board._board[0][0])
+        self.assertEqual(self.board.get_piece_by_string("a1"), self.board[0, 0])
 
     def test_is_colors_pieces(self):
         is_whites = self.board.is_colors_pieces("white")
@@ -195,6 +197,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.board_cache, {})
 
     def test_update_board_cache(self):
+        # Test update on move
         self.board.update_board_cache(
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
@@ -203,6 +206,7 @@ class TestBoard(unittest.TestCase):
             {(tuple(tuple(row) for row in self.board), self.board[0, 4]["color"]): 1},
         )
 
+        # Test count equal boards
         self.board.update_board_cache(
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
@@ -212,6 +216,7 @@ class TestBoard(unittest.TestCase):
         )
         self.assertEqual(self.board.threefold_repetition, False)
 
+        # Test threefold repetition
         self.board.update_board_cache(
             self.board[0, 4], copy.deepcopy(self.board[0, 4]), self.board, False
         )
@@ -221,6 +226,7 @@ class TestBoard(unittest.TestCase):
         )
         self.assertEqual(self.board.threefold_repetition, True)
 
+        # Test add different board to cache
         old_board = copy.deepcopy(self.board)
         self.board[1, 0] = None
         self.board.update_board_cache(
@@ -241,6 +247,7 @@ class TestBoard(unittest.TestCase):
         )
         self.assertEqual(self.board.threefold_repetition, True)
 
+        # Test clear cache on pawn move
         self.board.update_board_cache(
             self.board[1, 1], copy.deepcopy(self.board[1, 1]), self.board, False
         )

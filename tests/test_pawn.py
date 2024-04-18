@@ -70,14 +70,14 @@ class TestPawn(unittest.TestCase):
 
         # Test attacking and blocking
         self.pawn["state"]["has_moved"] = False
-        self.board._board[2][0] = Pawn((2, 0), "white", 40, "up")
-        self.board._board[2][1] = Pawn((2, 1), "white", 41, "up")
+        self.board[2, 0] = Pawn((2, 0), "white", 40, "up")
+        self.board[2, 1] = Pawn((2, 1), "white", 41, "up")
         self.assertEqual(self.pawn.get_allowed_moves(self.board), [(2, 1)])
 
         # Test en passant, just use print(self.board) to see what is happening.
-        self.board._board[2][1] = None
-        self.board._board[1][1] = Pawn((1, 1), "white", 41, "up")
-        self.board._board[1][1]["state"]["is_en_passant_able"] = True
+        self.board[2, 1] = None
+        self.board[1, 1] = Pawn((1, 1), "white", 41, "up")
+        self.board[1, 1]["state"]["is_en_passant_able"] = True
         self.assertEqual(self.pawn.get_allowed_moves(self.board), [(2, 1)])
         self.assertEqual(self.pawn.en_passant_cache, {(2, 1): (1, 1)})
 
