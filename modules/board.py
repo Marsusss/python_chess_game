@@ -8,7 +8,7 @@ from modules.pawn import Pawn
 
 
 class Board:
-    def __init__(self, player_colors, board=None):
+    def __init__(self, player_colors, board=None, board_by_config=False):
         check_utils.check_is_iterable_of_unique_elements_with_length(
             "player_colors", player_colors, list, min_length=2
         )
@@ -33,8 +33,55 @@ class Board:
                 Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
             ]
         else:
+            check_utils.check_is_iterable_of_length(
+                "board", board, list, min_length=3, max_length=20
+            )
+            check_utils.check_is_iterable_of_length(
+                "row_0", board[0], list, min_length=3, max_length=20
+            )
+            self.board_shape = (len(board), len(board[0]))
+
+            if board_by_config:
+                id_counter = 0
+                for i, row in enumerate(board):
+                    check_utils.check_is_iterable_of_length(
+                        f"row_{i}", row, list, self.board_shape[1]
+                    )
+                    for j, column in enumerate(row):
+                        if column is None or len(column) == 0:
+                            board[i][j] = None
+                        elif 2 <= len(column) <= 3:
+                            check_utils.check_is_instance(
+                                "Piece configuration", column, dict
+                            )
+                            if column["color"] not in self.player_colors:
+                                raise ValueError(
+                                    f"Color must be in {self.player_colors}, got "
+                                    f"{column['color']} instead"
+                                )
+                            if column["type"] == "king":
+                                board[i][j] = King((i, j), column["color"], id_counter)
+                            elif column["type"] == "pawn":
+                                board[i][j] = Pawn(
+                                    (i, j),
+                                    column["color"],
+                                    id_counter,
+                                    column["forward_direction"],
+                                )
+                            else:
+                                raise ValueError(
+                                    f"Invalid piece configuration, got "
+                                    f'{column["type"]}, expected "king" or "pawn"'
+                                )
+                            id_counter += 1
+                        else:
+                            raise ValueError(
+                                f"Invalid piece configuration, got {column}, expected "
+                                f'a dict with at least keys "type" and "color" and '
+                                f'possibly "forward_direction"'
+                            )
+
             self._board = board
-            self.board_shape = (len(self._board), len(self._board[0]))
 
         check_utils.check_is_iterable_of_length(
             "board", self._board, list, min_length=3, max_length=20
@@ -42,11 +89,6 @@ class Board:
         check_utils.check_is_iterable_of_length(
             "row_0", self._board[0], list, min_length=3, max_length=20
         )
-
-        for i, row in enumerate(self._board[1:]):
-            check_utils.check_is_iterable_of_length(
-                f"row_{i}", row, list, self.board_shape[1]
-            )
 
         self.piece_dict = self.construct_piece_dict()
         for player_color in self.player_colors:

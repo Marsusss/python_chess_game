@@ -30,6 +30,39 @@ class TestBoard(unittest.TestCase):
 
         self.assertEqual(self.board.king_positions, {"white": (0, 4), "black": (7, 4)})
 
+        self.board = Board(
+            self.player_colors,
+            [
+                [
+                    {"type": "king", "color": "white"},
+                    {"type": "pawn", "color": "white", "forward_direction": "down"},
+                    None,
+                ],
+                [
+                    {"type": "pawn", "color": "white", "forward_direction": "down"},
+                    [],
+                    [],
+                ],
+                [[], [], {"type": "pawn", "color": "black", "forward_direction": "up"}],
+                [
+                    [],
+                    {"type": "pawn", "color": "black", "forward_direction": "up"},
+                    {"type": "king", "color": "black"},
+                ],
+            ],
+            board_by_config=True,
+        )
+
+        self.assertEqual(
+            self.board._board,
+            [
+                [King((0, 0), "white", 0), Pawn((0, 1), "white", 1, "down"), None],
+                [Pawn((1, 0), "white", 2, "down"), None, None],
+                [None, None, Pawn((2, 2), "black", 3, "up")],
+                [None, Pawn((3, 1), "black", 4, "up"), King((3, 2), "black", 5)],
+            ],
+        )
+
     def test_eq(self):
         other_board = Board(player_colors=self.player_colors)
         self.assertEqual(self.board, other_board)

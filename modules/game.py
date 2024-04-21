@@ -7,7 +7,13 @@ from modules.game_log import GameLog
 
 
 class Game:
-    def __init__(self, board=None, player_id_to_player_config=None, max_turns=None):
+    def __init__(
+        self,
+        board=None,
+        player_id_to_player_config=None,
+        max_turns=None,
+        board_by_config=False,
+    ):
         if player_id_to_player_config is None:
             self.player_id_to_player_config = {
                 "p1": {"color": "white", "type": "ai", "model": "random"},
@@ -70,6 +76,10 @@ class Game:
 
         if board is None:
             self.board = Board(list(self.player_id_to_color.values()))
+        elif board_by_config:
+            self.board = Board(
+                list(self.player_id_to_color.values()), board, board_by_config=True
+            )
         else:
             check_utils.check_is_instance("board", board, Board)
             self.board = board
