@@ -16,6 +16,9 @@ Ideas:
 ## Illustration of classes
 ![Classes](images/chess_classes.png?raw=true "Classes")
 
+## They see me giffin' they hatin'
+![Gif](images/chess_game.gif?raw=true "Gif")
+
 ## Create a working chess game
 Table of classes and main with progress
 | status | Name | Description | Assignee | Branch |

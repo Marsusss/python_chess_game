@@ -13,7 +13,7 @@ jobs:
       uses: Marsusss/line-lint@v1.0.0
       with:
         directories_to_exclude: .git
-        extensions_to_exclude: png
+        extensions_to_exclude: png gif
 
     - name: Set up Python
       uses: actions/setup-python@v5
