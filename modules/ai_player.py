@@ -7,11 +7,21 @@ from modules.player import Player
 
 
 class AIPlayer(Player):
-    def __init__(self, player_id, color, model_name="random"):
+    def __init__(self, player_id, color, model_name="random", model_config=None):
         super().__init__(player_id, color)
         self.model_name = model_name
         if model_name != "random":
             raise ValueError(f"Model {model_name} is not supported.")
+
+        if model_config is None:
+            model_config = {"seed": 0}
+
+        self.model_config = model_config
+        if model_name == "random":
+            check_utils.check_is_instance(
+                f"random seed of {model_name}", self.model_config["seed"], int
+            )
+            random.seed(self.model_config["seed"])
 
     def __str__(self):
         return (
