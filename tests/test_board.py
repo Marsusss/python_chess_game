@@ -606,6 +606,18 @@ class TestBoard(unittest.TestCase):
         self.assertEqual([0, 6, 0], self.board.board_as_list[1][0])
         self.assertEqual([0, 0, 0], self.board.board_as_list[2][0])
 
+    def test_save_board_as_img(self):
+        self.board.save_board_as_img("somefile.png")
+        # Check that the file was created
+        success = False
+        import os
+        for file in os.listdir():
+            if file == "somefile.png":
+                success = True
+                break
+
+        self.assertTrue(success)
+
 
 if __name__ == "__main__":
     unittest.main()

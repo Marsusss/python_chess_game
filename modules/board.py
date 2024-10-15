@@ -1,5 +1,7 @@
 import copy
 
+from PIL import Image, ImageDraw, ImageFont
+
 import utils.check_utils as check_utils
 import utils.utils as utils
 from modules.chess_piece import ChessPiece
@@ -530,3 +532,28 @@ class Board:
         self.board_as_list[old_coordinate[0]][
             old_coordinate[1]
         ] = self.get_piece_as_list(self[old_coordinate])
+
+    def save_board_as_img(self, filename):
+        board_img = Image.new(
+            "RGB", (self.board_shape[1] * 20, self.board_shape[0] * 20), "white"
+        )
+        draw = ImageDraw.Draw(board_img)
+        font = ImageFont.load_default()
+        for i, row in enumerate(self):
+            for j, piece in enumerate(row):
+                color = "white" if (i + j) % 2 == 0 else "gray"
+                draw.rectangle([j * 20, i * 20,
+                                (j + 1) * 20, (i + 1) * 20], fill=color)
+                if piece is not None:
+                    if piece["color"] == self.player_colors[0]:
+                        color = "black"
+                    else:
+                        color = "red"
+                    draw.text(
+                        (j * 20 + 10 - 5, i * 20 + 10 - 5),
+                        piece.piece_type[:2],
+                        font=font,
+                        fill=color,
+                    )
+
+        board_img.save(filename)

@@ -235,6 +235,11 @@ class TestGame(unittest.TestCase):
         self.game.play_game()
         self.assertNotEqual(self.game.state["state"], "in_progress")
 
+    def test_play_game_and_save_gif(self):
+        self.game.turn_count = 99
+        self.game.play_game_and_save_gif()
+        self.assertNotEqual(self.game.state["state"], "in_progress")
+
 
 if __name__ == "__main__":
     unittest.main()
