@@ -1,3 +1,5 @@
+import imageio.v2 as imageio
+
 import utils.check_utils as check_utils
 from modules.ai_player import AIPlayer
 from modules.board import Board
@@ -7,7 +9,13 @@ from modules.game_log import GameLog
 
 
 class Game:
-    def __init__(self, board=None, player_id_to_player_config=None, max_turns=None):
+    def __init__(
+        self,
+        board=None,
+        player_id_to_player_config=None,
+        max_turns=None,
+        board_by_config=False,
+    ):
         if player_id_to_player_config is None:
             self.player_id_to_player_config = {
                 "p1": {"color": "white", "type": "ai", "model": "random"},
@@ -70,6 +78,10 @@ class Game:
 
         if board is None:
             self.board = Board(list(self.player_id_to_color.values()))
+        elif board_by_config:
+            self.board = Board(
+                list(self.player_id_to_color.values()), board, board_by_config=True
+            )
         else:
             check_utils.check_is_instance("board", board, Board)
             self.board = board
@@ -155,6 +167,17 @@ class Game:
     def play_game(self):
         while self.state["state"] == "in_progress":
             self.take_turn()
+
+    def play_game_and_save_gif(self):
+        images = []
+        while self.state["state"] == "in_progress":
+            self.take_turn()
+            filename = f"turn_{self.turn_count}.png"
+            self.board.save_board_as_img(filename)
+            images.append(imageio.imread(filename))
+
+        # Save the final GIF
+        imageio.mimsave("chess_game.gif", images, duration=0.5, loop=0)
 
     def check_game_state(self, current_player_id):
         check_utils.check_is_instance("current_player_id", current_player_id, str)
