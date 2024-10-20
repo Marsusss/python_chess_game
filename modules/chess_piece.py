@@ -32,7 +32,7 @@ class ChessPiece:
     }
 
     def __init__(self, position, piece_type, color, id):
-        check_utils.check_is_iterable_of_length("postion", position, tuple, 2)
+        check_utils.check_is_iterable_of_length("position", position, tuple, 2)
         for coordinate in position:
             check_utils.check_is_non_negative_int("piece_coordinate", coordinate)
 

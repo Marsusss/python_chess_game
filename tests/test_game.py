@@ -166,8 +166,7 @@ class TestGame(unittest.TestCase):
             {"state": "checkmate", "winner": "p2"},
         )
 
-        for column_idx in range(3, 6):
-            self.game.board[1, column_idx] = None
+        self.game.board[1, 3:6] = self.game.board[0, :4] = self.game.board[0, 5:] = None
 
         self.assertEqual(
             self.game.check_game_state(current_player_id="p2"),
@@ -236,9 +235,18 @@ class TestGame(unittest.TestCase):
         self.assertNotEqual(self.game.state["state"], "in_progress")
 
     def test_play_game_and_save_gif(self):
-        self.game.turn_count = 99
+        self.game.max_turns = 1
         self.game.play_game_and_save_gif()
         self.assertNotEqual(self.game.state["state"], "in_progress")
+
+    # def test_play_game_and_save_gifs(self): # comment out
+    #     n = 5
+    #     for i in range(n):
+    #         game = Game(max_turns=200, player_id_to_player_config={
+    #             "p1": {"color": "white", "type": "ai", "model": "random", "model_config": {"seed": i}},
+    #             "p2": {"color": "black", "type": "ai", "model": "random", "model_config": {"seed": i}},
+    #         })
+    #         game.play_game_and_save_gif(f'chess_game_{i}.gif')
 
 
 if __name__ == "__main__":

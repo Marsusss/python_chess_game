@@ -31,7 +31,7 @@ class Game:
             )
             for player_config in player_id_to_player_config.values():
                 check_utils.check_is_iterable_of_unique_elements_with_length(
-                    "player_config", player_config, dict, min_length=2, max_length=3
+                    "player_config", player_config, dict, min_length=2, max_length=4
                 )
             self.player_id_to_player_config = player_id_to_player_config
 
@@ -64,10 +64,17 @@ class Game:
                 )
 
             elif player_config["type"] == "ai":
+                if (
+                    not self.player_id_to_player_config[player_id]
+                    .keys()
+                    .__contains__("model_config")
+                ):
+                    self.player_id_to_player_config[player_id]["model_config"] = None
                 self.player_id_to_player[player_id] = AIPlayer(
                     player_id,
                     self.player_id_to_color[player_id],
                     self.player_id_to_player_config[player_id]["model"],
+                    self.player_id_to_player_config[player_id]["model_config"],
                 )
 
             else:
@@ -168,8 +175,11 @@ class Game:
         while self.state["state"] == "in_progress":
             self.take_turn()
 
-    def play_game_and_save_gif(self):
+    def play_game_and_save_gif(self, gifname="chess_game.gif"):
         images = []
+        filename = f"turn_{self.turn_count}.png"
+        self.board.save_board_as_img(filename)
+        images.append(imageio.imread(filename))
         while self.state["state"] == "in_progress":
             self.take_turn()
             filename = f"turn_{self.turn_count}.png"
@@ -177,7 +187,7 @@ class Game:
             images.append(imageio.imread(filename))
 
         # Save the final GIF
-        imageio.mimsave("chess_game.gif", images, duration=0.5, loop=0)
+        imageio.mimsave(gifname, images, duration=0.5, loop=0)
 
     def check_game_state(self, current_player_id):
         check_utils.check_is_instance("current_player_id", current_player_id, str)
