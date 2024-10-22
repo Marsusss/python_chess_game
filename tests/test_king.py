@@ -4,7 +4,7 @@ import unittest
 from modules.king import King
 
 
-class TestChessPiece(unittest.TestCase):
+class TestKing(unittest.TestCase):
     def setUp(self):
         self.king = King((0, 0), "black", 1)
 
