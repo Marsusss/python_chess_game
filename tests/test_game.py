@@ -243,8 +243,10 @@ class TestGame(unittest.TestCase):
     #     n = 5
     #     for i in range(n):
     #         game = Game(max_turns=200, player_id_to_player_config={
-    #             "p1": {"color": "white", "type": "ai", "model": "random", "model_config": {"seed": i}},
-    #             "p2": {"color": "black", "type": "ai", "model": "random", "model_config": {"seed": i}},
+    #             "p1": {"color": "white", "type": "ai", "model": "random",
+    #                    "model_config": {"seed": i}},
+    #             "p2": {"color": "black", "type": "ai", "model": "random",
+    #                    "model_config": {"seed": i}},
     #         })
     #         game.play_game_and_save_gif(f'chess_game_{i}.gif')
 

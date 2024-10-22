@@ -1,23 +1,12 @@
-# python_chess_ai
-First defines a chess game using linting, unit tests and an object-oriented structure. When this work is satisfactory pytorch will be used to train an ai using reinforcement learning.
-
-To do:
-* Create a working chess game - In progress
-* Create AI model that learns to play chess through reinforcement learning.
-* Create AI model that predicts the probability of victory/draw/loss.
-
-Ideas:
-* Create GUI
-* Make the game into an application with an endpoint
-* Make containerized players that can act through the endpoint
-* Deploy as application that other players can interact with and log the games
-* Download chess games from chess.com and use supervised learning to train/pretrain on these. This would ease training considerably.
+# Chess_game
+Defines a chess game project using linting, unit tests and an object-oriented structure. This project is intended to be able to play as AIs and human players. This project is intended to be able to auto play games given a model to enable evaluation and training of chess player models.
 
 ## Illustration of classes
 ![Classes](images/chess_classes.png?raw=true "Classes")
 
-## They see me giffin' they hatin'
+## Chess game
 ![Gif](images/chess_game_0.gif?raw=true "Gif") ![Gif](images/chess_game_1.gif?raw=true "Gif") ![Gif](images/chess_game_2.gif?raw=true "Gif") ![Gif](images/chess_game_3.gif?raw=true "Gif") ![Gif](images/chess_game_4.gif?raw=true "Gif")
+
 
 ## Create a working chess game
 Table of classes and main with progress
