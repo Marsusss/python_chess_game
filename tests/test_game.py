@@ -3,6 +3,7 @@ import unittest
 from modules.board import Board
 from modules.game import Game
 from modules.game_log import GameLog
+from modules.king import King
 from modules.pawn import Pawn
 
 
@@ -17,6 +18,36 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.turn_count, 0)
         self.assertEqual(self.game.player_idx_turn, 0)
         self.assertEqual(self.game.state, {"state": "in_progress", "winner": None})
+
+        board_config = [
+            [
+                {"type": "king", "color": "white"},
+                {"type": "pawn", "color": "white", "forward_direction": "down"},
+                None,
+            ],
+            [
+                {"type": "pawn", "color": "white", "forward_direction": "down"},
+                [],
+                [],
+            ],
+            [[], [], {"type": "pawn", "color": "black", "forward_direction": "up"}],
+            [
+                [],
+                {"type": "pawn", "color": "black", "forward_direction": "up"},
+                {"type": "king", "color": "black"},
+            ],
+        ]
+        game = Game(board=board_config, board_by_config=True)
+
+        self.assertEqual(
+            game.board._board,
+            [
+                [King((0, 0), "white", 0), Pawn((0, 1), "white", 1, "down"), None],
+                [Pawn((1, 0), "white", 2, "down"), None, None],
+                [None, None, Pawn((2, 2), "black", 3, "up")],
+                [None, Pawn((3, 1), "black", 4, "up"), King((3, 2), "black", 5)],
+            ],
+        )
 
         with self.assertRaises(ValueError):
             Game(player_id_to_player_config={})
@@ -135,9 +166,8 @@ class TestGame(unittest.TestCase):
             {"state": "checkmate", "winner": "p2"},
         )
 
-        self.game.board[1, 3:6] = None
-        self.game.board[0, :4] = None
-        self.game.board[0, 5:] = None
+        self.game.board[1, 3:6] = self.game.board[0, :4] = self.game.board[0, 5:] = None
+
         self.assertEqual(
             self.game.check_game_state(current_player_id="p2"),
             {"state": "remis", "winner": None},
@@ -199,12 +229,26 @@ class TestGame(unittest.TestCase):
         )
         while self.game.state["state"] == "in_progress":
             self.game.take_turn()
-            print(self.game)
-            print(self.game.board.board_cache)
 
     def test_play_game(self):
         self.game.play_game()
         self.assertNotEqual(self.game.state["state"], "in_progress")
+
+    def test_play_game_and_save_gif(self):
+        self.game.max_turns = 1
+        self.game.play_game_and_save_gif()
+        self.assertNotEqual(self.game.state["state"], "in_progress")
+
+    # def test_play_game_and_save_gifs(self): # comment out
+    #     n = 5
+    #     for i in range(n):
+    #         game = Game(max_turns=200, player_id_to_player_config={
+    #             "p1": {"color": "white", "type": "ai", "model": "random",
+    #                    "model_config": {"seed": i}},
+    #             "p2": {"color": "black", "type": "ai", "model": "random",
+    #                    "model_config": {"seed": i}},
+    #         })
+    #         game.play_game_and_save_gif(f'chess_game_{i}.gif')
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import imageio.v2 as imageio
+
 import utils.check_utils as check_utils
 from modules.ai_player import AIPlayer
 from modules.board import Board
@@ -7,7 +9,13 @@ from modules.game_log import GameLog
 
 
 class Game:
-    def __init__(self, board=None, player_id_to_player_config=None, max_turns=None):
+    def __init__(
+        self,
+        board=None,
+        player_id_to_player_config=None,
+        max_turns=None,
+        board_by_config=False,
+    ):
         if player_id_to_player_config is None:
             self.player_id_to_player_config = {
                 "p1": {"color": "white", "type": "ai", "model": "random"},
@@ -23,7 +31,7 @@ class Game:
             )
             for player_config in player_id_to_player_config.values():
                 check_utils.check_is_iterable_of_unique_elements_with_length(
-                    "player_config", player_config, dict, min_length=2, max_length=3
+                    "player_config", player_config, dict, min_length=2, max_length=4
                 )
             self.player_id_to_player_config = player_id_to_player_config
 
@@ -56,10 +64,17 @@ class Game:
                 )
 
             elif player_config["type"] == "ai":
+                if (
+                    not self.player_id_to_player_config[player_id]
+                    .keys()
+                    .__contains__("model_config")
+                ):
+                    self.player_id_to_player_config[player_id]["model_config"] = None
                 self.player_id_to_player[player_id] = AIPlayer(
                     player_id,
                     self.player_id_to_color[player_id],
                     self.player_id_to_player_config[player_id]["model"],
+                    self.player_id_to_player_config[player_id]["model_config"],
                 )
 
             else:
@@ -70,6 +85,10 @@ class Game:
 
         if board is None:
             self.board = Board(list(self.player_id_to_color.values()))
+        elif board_by_config:
+            self.board = Board(
+                list(self.player_id_to_color.values()), board, board_by_config=True
+            )
         else:
             check_utils.check_is_instance("board", board, Board)
             self.board = board
@@ -155,6 +174,20 @@ class Game:
     def play_game(self):
         while self.state["state"] == "in_progress":
             self.take_turn()
+
+    def play_game_and_save_gif(self, gifname="chess_game.gif"):
+        images = []
+        filename = f"turn_{self.turn_count}.png"
+        self.board.save_board_as_img(filename)
+        images.append(imageio.imread(filename))
+        while self.state["state"] == "in_progress":
+            self.take_turn()
+            filename = f"turn_{self.turn_count}.png"
+            self.board.save_board_as_img(filename)
+            images.append(imageio.imread(filename))
+
+        # Save the final GIF
+        imageio.mimsave(gifname, images, duration=0.5, loop=0)
 
     def check_game_state(self, current_player_id):
         check_utils.check_is_instance("current_player_id", current_player_id, str)
