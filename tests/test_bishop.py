@@ -1,8 +1,9 @@
 import copy
 import unittest
 
-from modules.board import Board
 from modules.bishop import Bishop
+from modules.board import Board
+
 
 class TestBishop(unittest.TestCase):
     def setUp(self):
@@ -48,12 +49,18 @@ class TestBishop(unittest.TestCase):
         # Test move when pawns are cleared
         self.board._board[1][1] = None
         self.board._board[1][3] = None
-        self.assertEqual(self.bishop.get_allowed_moves(self.board), [(1, 1), (2, 0), (1, 3), (2, 4), (3, 5), (4, 6), (5, 7)])
+        self.assertEqual(
+            self.bishop.get_allowed_moves(self.board),
+            [(1, 1), (2, 0), (1, 3), (2, 4), (3, 5), (4, 6), (5, 7)],
+        )
 
         # Test capturing and blocked by own piece
         self.board._board[4][6] = Bishop((4, 6), "white", 41)
         self.board._board[2][0] = Bishop((2, 0), "black", 42)
-        self.assertEqual(self.bishop.get_allowed_moves(self.board), [(1, 1), (1, 3), (2, 4), (3, 5), (4, 6)])
+        self.assertEqual(
+            self.bishop.get_allowed_moves(self.board),
+            [(1, 1), (1, 3), (2, 4), (3, 5), (4, 6)],
+        )
 
     def test_move(self):
         self.board._board[1][1] = None

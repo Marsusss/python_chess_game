@@ -94,7 +94,6 @@ class Game:
             self.board = board
 
         if len(self.board.player_colors) != len(self.player_id_to_player):
-            print(self.player_id_to_player)
             raise ValueError(
                 f"The number of player colors on the board "
                 f"{len(self.board.player_colors)} must match the number of players "
