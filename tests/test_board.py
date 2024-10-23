@@ -348,7 +348,7 @@ class TestBoard(unittest.TestCase):
                 "white", self.board.get_candidate_moves("white")
             ),
             [
-                [[], [(1, 3)], [], [], [(0, 3), (0, 5), (1, 3)], [], [], []],
+                [[], [(1, 3)], [(1, 3)], [], [(0, 3), (1, 3)], [], [], []],
                 [[], [], [], [], [], [], [], []],
                 [[], [], [], [], [], [], [], []],
                 [[], [], [], [], [], [], [], []],
@@ -435,7 +435,6 @@ class TestBoard(unittest.TestCase):
             self.board[2, column_idx].position = (2, column_idx)
 
         self.assertFalse(self.board.has_no_allowed_moves_and_is_not_check("white"))
-
         self.board[1, 3:6] = self.board[0, :4] = self.board[0, 5:] = None
 
         self.assertTrue(self.board.has_no_allowed_moves_and_is_not_check("white"))

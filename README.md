@@ -15,7 +15,7 @@ Table of classes and main with progress
 | ✅ | ChessPiece   |   |   |   |
 | ✅ | King         |   |   |   |
 | ✅ | Pawn         |   |   |   |
-| ⌛ | Bishop      |   | thelodberg | [Bishop](https://github.com/Marsusss/python_chess_ai/tree/Bishop_Implementation) |
+| ✅ | Bishop      |   |   |   |
 | ✅ | Knight      |   |   |   |
 | :x: | Rook        |   |   |   |
 | :x: | Queen       |   |   |   |

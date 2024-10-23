@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 import utils.check_utils as check_utils
 import utils.utils as utils
+from modules.bishop import Bishop
 from modules.chess_piece import ChessPiece
 from modules.king import King
 from modules.knight import Knight
@@ -19,13 +20,20 @@ class Board:
 
         if board is None:
             self._board = [[None for _ in range(8)] for _ in range(8)]
+
             self.board_shape = (len(self), len(self[0]))
             self[0, 4] = King((0, 4), player_colors[0], 4)
             self[7, 4] = King((7, 4), player_colors[1], 3 * 8 + 4)
+
             self[1] = [Pawn((1, i), player_colors[0], 8 + i, "down") for i in range(8)]
             self[6] = [
                 Pawn((6, i), player_colors[1], 2 * 8 + i, "up") for i in range(8)
             ]
+
+            self[0, 2] = Bishop((0, 2), player_colors[0], 2)
+            self[0, 5] = Bishop((0, 5), player_colors[0], 5)
+            self[7, 2] = Bishop((7, 2), player_colors[1], 3 * 8 + 2)
+            self[7, 5] = Bishop((7, 5), player_colors[1], 3 * 8 + 5)
             self[0, 1] = Knight((0, 1), player_colors[0], 1)
             self[0, 6] = Knight((0, 6), player_colors[0], 6)
             self[7, 1] = Knight((7, 1), player_colors[1], 3 * 8 + 1)
@@ -101,7 +109,9 @@ class Board:
                     "King_list", self.piece_dict[(player_color, "king")], list, 1
                 )
             except KeyError:
-                raise ValueError(f"{player_color} player doesn't have a king")
+                raise ValueError(
+                    f"{player_color} player doesn't have a king\n board:\n {self}"
+                )
 
         alphabet = [
             "a",
