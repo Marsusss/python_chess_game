@@ -1,5 +1,5 @@
 # Chess_game
-Defines a chess game project using linting, unit tests and an object-oriented structure. This project is intended to be able to play as AIs and human players. This project is intended to be able to auto play games given a model to enable evaluation and training of chess player models.
+Defines an object oriented chess game project using linting, unit tests implemented into CI-workflows. This project is intended to be able to auto play games given a model to produce evaluation and training data for chess player models.
 
 ## Illustration of classes
 ![Classes](images/chess_classes.png?raw=true "Classes")
