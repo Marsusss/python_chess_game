@@ -213,8 +213,10 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board[2, 1], None)
 
         # Test change king_position
-        self.board.move_piece((0, 4), (0, 3))
-        self.assertEqual(self.board.king_positions["white"], (0, 3))
+        print(self.board)
+        self.board[1, 4] = None
+        self.board.move_piece((0, 4), (1, 4))
+        self.assertEqual(self.board.king_positions["white"], (1, 4))
         self.assertEqual(self.board.board_cache, {})
 
         # Test building board cache on reversible move
@@ -348,7 +350,7 @@ class TestBoard(unittest.TestCase):
                 "white", self.board.get_candidate_moves("white")
             ),
             [
-                [[], [(1, 3)], [(1, 3)], [], [(0, 3), (1, 3)], [], [], []],
+                [[], [(1, 3)], [(1, 3)], [(1, 3)], [(1, 3)], [], [], []],
                 [[], [], [], [], [], [], [], []],
                 [[], [], [], [], [], [], [], []],
                 [[], [], [], [], [], [], [], []],

@@ -47,24 +47,22 @@ class TestBishop(unittest.TestCase):
         self.assertEqual(self.bishop.get_allowed_moves(self.board), [])
 
         # Test move when pawns are cleared
-        self.board._board[1][1] = None
-        self.board._board[1][3] = None
+        self.board[1, :] = None
         self.assertEqual(
             self.bishop.get_allowed_moves(self.board),
             [(1, 1), (2, 0), (1, 3), (2, 4), (3, 5), (4, 6), (5, 7)],
         )
 
         # Test capturing and blocked by own piece
-        self.board._board[4][6] = Bishop((4, 6), "white", 41)
-        self.board._board[2][0] = Bishop((2, 0), "black", 42)
+        self.board[4, 6] = Bishop((4, 6), "white", 41)
+        self.board[2, 0] = Bishop((2, 0), "black", 42)
         self.assertEqual(
             self.bishop.get_allowed_moves(self.board),
             [(1, 1), (1, 3), (2, 4), (3, 5), (4, 6)],
         )
 
     def test_move(self):
-        self.board._board[1][1] = None
-        self.board._board[1][3] = None
+        self.board[1, :] = None
         self.bishop.move((2, 0), self.board)
         self.assertEqual(self.bishop.position, (2, 0))
 
