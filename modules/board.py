@@ -553,7 +553,7 @@ class Board:
             old_coordinate[1]
         ] = self.get_piece_as_list(self[old_coordinate])
 
-    def save_board_as_img(self, filename):
+    def draw_board(self):
         board_img = Image.new(
             "RGB", (self.board_shape[1] * 20, self.board_shape[0] * 20), "white"
         )
@@ -564,9 +564,8 @@ class Board:
                 color = "white" if (i + j) % 2 == 0 else "gray"
                 draw.rectangle([j * 20, i * 20, (j + 1) * 20, (i + 1) * 20], fill=color)
                 if piece is not None:
-                    if piece["color"] == self.player_colors[0]:
-                        color = "black"
-                    else:
+                    color = piece.color
+                    if piece["color"] == "white":
                         color = "red"
                     draw.text(
                         (j * 20 + 10 - 5, i * 20 + 10 - 5),
@@ -575,4 +574,25 @@ class Board:
                         fill=color,
                     )
 
+        return board_img, draw
+
+    def save_board_as_img(self, filename, board_img=None):
+        if board_img is None:
+            board_img, _ = self.draw_board()
+
         board_img.save(filename)
+
+    def add_text_to_img(self, board_img, text, font_size):
+        draw = ImageDraw.Draw(board_img)
+        font = ImageFont.load_default(size=font_size)
+        _, _, w, h = draw.textbbox((0, 0), text, font=font)
+        draw.text(
+            (
+                (self.board_shape[1] * 20 - w) / 2,
+                (self.board_shape[0] * 20 - h) / 2 - 5,
+            ),
+            text,
+            font=font,
+            fill="black",
+        )
+        return board_img
