@@ -235,7 +235,7 @@ class TestGame(unittest.TestCase):
         self.assertNotEqual(self.game.state["state"], "in_progress")
 
     def test_play_game_and_save_gif(self):
-        self.game.max_turns = 1
+        self.game.max_turns = 20
         self.game.play_game_and_save_gif()
         self.assertNotEqual(self.game.state["state"], "in_progress")
 

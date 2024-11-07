@@ -176,17 +176,28 @@ class Game:
 
     def play_game_and_save_gif(self, gifname="chess_game.gif"):
         images = []
-        filename = f"turn_{self.turn_count}.png"
-        self.board.save_board_as_img(filename)
-        images.append(imageio.imread(filename))
+        filename = "board.png"
+
         while self.state["state"] == "in_progress":
-            self.take_turn()
-            filename = f"turn_{self.turn_count}.png"
             self.board.save_board_as_img(filename)
             images.append(imageio.imread(filename))
+            self.take_turn()
+
+        board_img, _ = self.board.draw_board()
+        if self.state["state"] == "checkmate":
+            self.board.add_text_to_img(
+                board_img, f"{self.player_id_to_color[self.state['winner']]} wins!", 30
+            )
+        elif self.state["state"] == "remis":
+            self.board.add_text_to_img(board_img, "Remis", 30)
+        else:
+            self.board.add_text_to_img(board_img, "Turn limit", 30)
+
+        board_img.save(filename)
+        images.append(imageio.imread(filename))
 
         # Save the final GIF
-        imageio.mimsave(gifname, images, duration=0.5, loop=0)
+        imageio.mimsave(gifname, images, duration=400, loop=0)
 
     def check_game_state(self, current_player_id):
         check_utils.check_is_instance("current_player_id", current_player_id, str)
